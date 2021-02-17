@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, NowPlaying
+from models import db, User, Backlog, NowPlaying, Genre, Favorites
 #from models import Person
 
 app = Flask(__name__)
@@ -55,7 +55,7 @@ def get_single_user(user_id):
     return "Invalid Method", 404
 
 # This route we create is for post method purposes only to Create an Account
-@app.route('/user', methods=['POST']) 
+@app.route('/user', methods=['POST'])
 def handle_user():
 
     # First we get the payload json
