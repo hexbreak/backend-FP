@@ -110,3 +110,18 @@ class Favorites(db.Model):
             "game_id": self.game_id,
             "game_name": self.game_name
         }
+
+class AboutMe(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    about_box = db.Column(db.String(500), unique=False, nullable=False)
+
+    def __repr__(self):
+        return '<AboutMe %r>' % self.about_box
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "about_box": self.about_box
+        }
