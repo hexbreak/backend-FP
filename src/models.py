@@ -36,10 +36,10 @@ class Backlog(db.Model):
     game_id = db.Column(db.String(250), unique=True, nullable=False)
     game_name = db.Column(db.String(250), unique=True, nullable=False)
     game_platform = db.Column(db.String(250), unique=True, nullable=False)
-    uncleared = db.Column(db.String(10), unique=False, nullable=False)
-    in_progress = db.Column(db.String(10), unique=False, nullable=False)
-    finished = db.Column(db.String(10), unique=False, nullable=False)
-    completed = db.Column(db.String(10), unique=False, nullable=False)
+    uncleared = db.Column(db.String(10), unique=False, default=False, nullable=False)
+    in_progress = db.Column(db.String(10), unique=False, default=False, nullable=False)
+    finished = db.Column(db.String(10), unique=False, default=False, nullable=False)
+    completed = db.Column(db.String(10), unique=False, default=False, nullable=False)
 
     def __repr__(self):
         return '<Backlog %r>' % self.user_id
@@ -65,7 +65,7 @@ class NowPlaying(db.Model):
     comment = db.Column(db.String(250), unique=False, nullable=False)
 
     def __repr__(self):
-        return '<NowPlaying %r>' % self.user_id
+        return '<NowPlaying %r>' % self.game_name
 
     def serialize(self):
         return {
@@ -101,7 +101,7 @@ class Favorites(db.Model):
     list_name = db.Column(db.String(250), unique=True, nullable=False)
 
     def __repr__(self):
-        return '<Favorites %r>' % self.list_name
+        return '<Favorites %r>' % self.game_name
 
     def serialize(self):
         return {
