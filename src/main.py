@@ -40,16 +40,16 @@ def handle_hello():
     return jsonify(response_body), 200
 
 #This is the get method for the user to login
-@app.route('/user/<int:person_id>', methods=['PUT', 'GET'])
+@app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
 def get_single_user(user_id):
     body = request.get_json() #{ 'username': 'new_username'}
     if request.method == 'PUT':
-        user1 = Person.query.get(person_id)
+        user1 = User.query.get(user_id)
         user1.username = body.username
         db.session.commit()
         return jsonify(user1.serialize()), 200
     if request.method == 'GET':
-        user1 = Person.query.get(person_id)
+        user1 = User.query.get(user_id)
         return jsonify(user1.serialize()), 200
 
     return "Invalid Method", 404
