@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, NowPlaying
 #from models import Person
 
 app = Flask(__name__)
@@ -38,6 +38,43 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+#This is the get method for the user to login
+@app.route('/user/<int:person_id>', methods=['PUT', 'GET'])
+def get_single_user(user_id):
+    body = request.get_json() #{ 'username': 'new_username'}
+    if request.method == 'PUT':
+        user1 = Person.query.get(person_id)
+        user1.username = body.username
+        db.session.commit()
+        return jsonify(user1.serialize()), 200
+    if request.method == 'GET':
+        user1 = Person.query.get(person_id)
+        return jsonify(user1.serialize()), 200
+
+    return "Invalid Method", 404
+
+# This route we create is for post method purposes only to Create an Account
+@app.route('/user', methods=['POST']) 
+def handle_user():
+
+    # First we get the payload json
+    body = request.get_json()
+
+    if body is None:
+        raise APIException("You need to specify the request body as a json object", status_code=400)
+    if 'username' not in body:
+        raise APIException('You need to specify the username', status_code=400)
+    if 'email' not in body:
+        raise APIException('You need to specify the email', status_code=400)
+    if 'password' not in body:
+        raise APIException('You need to specify the password', status_code=400 )
+
+    # at this point, all data has been validated, we can proceed to inster into the bd
+    user1 = User(username=body['username'], email=body['email'], password=['password'])
+    db.session.add(user1)
+    db.session.commit()
+    return "ok", 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
