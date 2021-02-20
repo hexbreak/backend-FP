@@ -39,6 +39,9 @@ class ProgressionStatus(enum.Enum):
     FINISHED = 3
     COMPLETED = 4
 
+    def __int__(self):
+        return self.value
+
 class Backlog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -59,7 +62,7 @@ class Backlog(db.Model):
             "game_name": self.game_name,
             "game_platform": self.game_platform,
             "game_notes": self.game_notes,
-            "progress_status": self.progress_status # Must convert to JSON in order to avoid any crashes with the GET method.
+            "progress_status": self.progress_status.value # Must convert to JSON in order to avoid any crashes with the GET method.
         }
 
 class NowPlaying(db.Model):
