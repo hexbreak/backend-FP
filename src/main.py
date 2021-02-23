@@ -56,7 +56,7 @@ def get_single_user(user_id):
 
 # This route we create is for post method purposes only to Create an Account
 @app.route('/user', methods=['POST'])
-def handle_user():
+def post_user():
 
     # First we get the payload json
     body = request.get_json()
@@ -68,13 +68,18 @@ def handle_user():
     if 'email' not in body:
         raise APIException('You need to specify the email', status_code=400)
     if 'password' not in body:
-        raise APIException('You need to specify the password', status_code=400 )
+        raise APIException('You need to specify the password', status_code=400)
+    if 'first_name' not in body:
+        raise APIException('You need to specify the first name', status_code=400)
+    if 'last_name' not in body:
+        raise APIException('You need to specify the last name', status_code=400)
 
     # at this point, all data has been validated, we can proceed to inster into the bd
-    user1 = User(username=body['username'], email=body['email'], password=['password'])
+    user1 = User(username=body['username'], email=body['email'], password=body['password'], first_name=body['first_name'], last_name=body['last_name'], profile_avatar=body['profile_avatar'])
     db.session.add(user1)
     db.session.commit()
-    return "ok", 200
+    print("/////////", user1)
+    return jsonify(user1.serialize()), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':

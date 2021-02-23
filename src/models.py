@@ -12,9 +12,9 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     username = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
-    profile_avatar = db.Column(db.String(250), unique=False, nullable=False)
+    profile_avatar = db.Column(db.String(250), unique=False, nullable=True)
     joined = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    is_active = db.Column(db.Boolean, unique=False, nullable=False)
+    is_active = db.Column(db.Boolean, unique=False, nullable=False, default=False)
 
     def __repr__(self):
         return '<User %r>' % self.id
