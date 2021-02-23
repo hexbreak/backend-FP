@@ -39,6 +39,18 @@ def handle_hello():
 
     return jsonify(response_body), 200
 
+@app.route('/users', methods=['GET'])
+def get_all_users():
+
+    allusers = User.query.all()
+    response_body = list(map(lambda x: x.serialize(), allusers))
+
+    if response_body is None:
+        raise APIException('You should not be seeing this. Check the route for errors.', status_code=400)
+
+    return jsonify(response_body), 200
+
+
 #This is the get method for the user to login
 @app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
 def get_single_user(user_id):
@@ -87,7 +99,20 @@ def post_backlog(user_id):
     user1 = User.query.get(user_id) 
     body = request.get_json()
 
-    # add if statements for errors
+    if body is None:
+        raise APIException("You need to specify the request body as a json object", status_code=400)
+    if 'game_id' not in body:
+        raise APIException('You need to specify the game id', status_code=400)
+    if 'game_name' not in body:
+        raise APIException('You need to specify the game name', status_code=400)
+    if 'game_platform' not in body:
+        raise APIException('You need to specify the game platform', status_code=400)
+    if 'game_notes' not in body:
+        raise APIException('You need to specify the game notes', status_code=400)
+    if 'progress_status' not in body:
+        raise APIException('You need to specify the progress status', status_code=400)
+    if 'now_playing' not in body:
+        raise APIException('You need to specify true or false for now playing', status_code=400)
 
     backlog1 = Backlog(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'], game_platform=body['game_platform'], game_notes=body['game_notes'], progress_status=body['progress_status'], now_playing=body['now_playing'])
     db.session.add(backlog1)
@@ -100,7 +125,8 @@ def post_backlog(user_id):
 @app.route('/user/<int:user_id>/backlog/<int:backlog_id>', methods=['DELETE'])
 def delete_backlog(user_id):
 
-    backlog1 = Backlog.query.get(backlog_id)
+    backlog1 = Backlog.query.get(user_id)
+    print(backlog1)
 
     return "ok", 200
     
