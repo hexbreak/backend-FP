@@ -30,15 +30,6 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
-
-    response_body = {
-        "msg": "Hello, this is your GET /user response"
-    }
-
-    return jsonify(response_body), 200
-
 @app.route('/users', methods=['GET'])
 def get_all_users():
 
@@ -51,7 +42,7 @@ def get_all_users():
     return jsonify(response_body), 200
 
 
-#This is the get method for the user to login
+# This is the get method for the user to login
 @app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
 def get_single_user(user_id):
     body = request.get_json() #{ 'username': 'new_username'}
@@ -64,13 +55,46 @@ def get_single_user(user_id):
         user1 = User.query.get(user_id)
         return jsonify(user1.serialize()), 200
 
-    return "Invalid Method", 404
+    return 'Invalid Method', 404
 
-# This route we create is for post method purposes only to Create an Account
+# This route we created is for obtaining data a specific Backlog ID only.
+@app.route('/user/<int:user_id>/backlog/<int:backlog_id>', methods=['PUT', 'GET'])
+def get_backlog_id(user_id, backlog_id):
+
+    body = request.get_json()
+
+    if request.method == 'PUT':
+        putbacklog = Backlog.query.get(backlog_id)
+        if putbacklog is None:
+            raise APIException('Backlog ID not found', status_code=404)
+        if 'game_id' in body:
+            putbacklog.game_id = body['game_id']
+        if 'game_name' in body:
+            putbacklog.game_name = body['game_name']
+        if 'game_platform' in body:
+            putbacklog.game_platform = body['game_platform']
+        if 'game_notes' in body:
+            putbacklog.game_notes = body['game_notes']
+        if 'progress_status' in body:
+            putbacklog.progress_status = body['progress_status']
+        if 'now_playing' in body:
+            putbacklog.nowp_playing = body['now_playing']
+        db.session.commit()
+        return jsonify(putbacklog.serialize()), 200
+
+    if request.method == 'GET':
+        getbacklog = Backlog.query.get(backlog_id)
+        return jsonify(getbacklog.serialize()), 200
+
+    print("////", pullbacklog)
+    print("////", getbacklog)
+
+    return "Ok!", 200
+
+# This route we created is for post method purposes only to Create an Account.
 @app.route('/user', methods=['POST'])
 def post_user():
 
-    # First we get the payload json
     body = request.get_json()
 
     if body is None:
@@ -86,13 +110,13 @@ def post_user():
     if 'last_name' not in body:
         raise APIException('You need to specify the last name', status_code=400)
 
-    # at this point, all data has been validated, we can proceed to inster into the bd
     user1 = User(username=body['username'], email=body['email'], password=body['password'], first_name=body['first_name'], last_name=body['last_name'], profile_avatar=body['profile_avatar'])
     db.session.add(user1)
     db.session.commit()
     print("/////////", user1)
     return jsonify(user1.serialize()), 200
 
+# This route we created is for posting new data for the Users Backlog.
 @app.route('/user/<int:user_id>/backlog', methods=['POST'])
 def post_backlog(user_id):
 
@@ -122,6 +146,7 @@ def post_backlog(user_id):
 
     return jsonify(backlog1.serialize()), 200
 
+# This route we created is for deleting data from the Users Backlog.
 @app.route('/user/<int:user_id>/backlog/<int:backlog_id>', methods=['DELETE'])
 def delete_backlog(user_id):
 
