@@ -46,8 +46,8 @@ class Backlog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     game_id = db.Column(db.String(250), unique=True, nullable=False)
-    game_name = db.Column(db.String(250), unique=True, nullable=False)
-    game_platform = db.Column(db.String(250), unique=True, nullable=False)
+    game_name = db.Column(db.String(250), unique=False, nullable=False)
+    game_platform = db.Column(db.String(250), unique=False, nullable=False)
     game_notes = db.Column(db.String(500), unique=False, default=False, nullable=False)
     progress_status = db.Column(db.Enum(ProgressionStatus))
     now_playing = db.Column(db.Boolean, unique=False, nullable=False)
@@ -63,7 +63,7 @@ class Backlog(db.Model):
             "game_name": self.game_name,
             "game_platform": self.game_platform,
             "game_notes": self.game_notes,
-            "progress_status": self.progress_status.value # Must convert to JSON in order to avoid any crashes with the GET method.
+            "progress_status": self.progress_status.value
         }
 
 class Genre(db.Model):

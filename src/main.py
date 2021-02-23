@@ -81,6 +81,31 @@ def post_user():
     print("/////////", user1)
     return jsonify(user1.serialize()), 200
 
+@app.route('/user/<int:user_id>/backlog', methods=['POST'])
+def post_backlog(user_id):
+
+    user1 = User.query.get(user_id) 
+    body = request.get_json()
+
+    # add if statements for errors
+
+    backlog1 = Backlog(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'], game_platform=body['game_platform'], game_notes=body['game_notes'], progress_status=body['progress_status'], now_playing=body['now_playing'])
+    db.session.add(backlog1)
+    db.session.commit()
+
+    print(backlog1)
+
+    return jsonify(backlog1.serialize()), 200
+
+@app.route('/user/<int:user_id>/backlog/<int:backlog_id>', methods=['DELETE'])
+def delete_backlog(user_id):
+
+    backlog1 = Backlog.query.get(backlog_id)
+
+    return "ok", 200
+    
+    
+
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
