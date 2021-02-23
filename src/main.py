@@ -30,6 +30,7 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+# This get method grabs EVERYTHING we have collected from the Users.
 @app.route('/users', methods=['GET'])
 def get_all_users():
 
@@ -42,22 +43,25 @@ def get_all_users():
     return jsonify(response_body), 200
 
 
-# This is the get method for the user to login
+# Login & Update
 @app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
 def get_single_user(user_id):
+
     body = request.get_json() #{ 'username': 'new_username'}
+
     if request.method == 'PUT':
         user1 = User.query.get(user_id)
         user1.username = body.username
         db.session.commit()
         return jsonify(user1.serialize()), 200
+
     if request.method == 'GET':
         user1 = User.query.get(user_id)
         return jsonify(user1.serialize()), 200
 
     return 'Invalid Method', 404
 
-# This route we created is for obtaining data a specific Backlog ID only.
+# Obtain & Update Backlog_ID's from a User_ID
 @app.route('/user/<int:user_id>/backlog/<int:backlog_id>', methods=['PUT', 'GET'])
 def get_backlog_id(user_id, backlog_id):
 
@@ -86,12 +90,9 @@ def get_backlog_id(user_id, backlog_id):
         getbacklog = Backlog.query.get(backlog_id)
         return jsonify(getbacklog.serialize()), 200
 
-    print("////", pullbacklog)
-    print("////", getbacklog)
-
     return "Ok!", 200
 
-# This route we created is for post method purposes only to Create an Account.
+# Create User Account
 @app.route('/user', methods=['POST'])
 def post_user():
 
@@ -113,10 +114,10 @@ def post_user():
     user1 = User(username=body['username'], email=body['email'], password=body['password'], first_name=body['first_name'], last_name=body['last_name'], profile_avatar=body['profile_avatar'])
     db.session.add(user1)
     db.session.commit()
-    print("/////////", user1)
+
     return jsonify(user1.serialize()), 200
 
-# This route we created is for posting new data for the Users Backlog.
+# Create new Backlog_ID for a User_ID
 @app.route('/user/<int:user_id>/backlog', methods=['POST'])
 def post_backlog(user_id):
 
@@ -146,16 +147,19 @@ def post_backlog(user_id):
 
     return jsonify(backlog1.serialize()), 200
 
-# This route we created is for deleting data from the Users Backlog.
+# Delete a Backlog_ID from a User_ID
 @app.route('/user/<int:user_id>/backlog/<int:backlog_id>', methods=['DELETE'])
-def delete_backlog(user_id):
+def delete_backlog(user_id, backlog_id):
 
-    backlog1 = Backlog.query.get(user_id)
-    print(backlog1)
+    remove_backlog = Backlog.query.get(backlog_id)
+    if remove_backlog is None:
+        raise APIException('Backlog ID not found', status_code=404)
+    db.session.delete(remove_backlog)
+    db.session.commit()
 
-    return "ok", 200
-    
-    
+    print(remove_backlog)
+
+    return "Backlog ID deleted.", 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
