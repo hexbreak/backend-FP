@@ -48,24 +48,13 @@ def filter_first_name(user_id):
 
     body = request.get_json()
 
-    print("!/!/body/!/!/", body)
-
-    # result = Backlog.query.filter(user_id == user_id)
     result = db.session.query(Backlog).filter(Backlog.user_id == user_id)
-    # filter_name = Backlog.query.filter_by(user_id=user_id, game_genre=body['game_genre'])
     all_backlog = list(map(lambda x: x.serialize(), result))
     general_list = []
 
     for x in all_backlog:
         if x['game_genre'] != "":
             general_list.append(x['game_genre'])
-
-    print("!/!/general_list/!/", general_list)
-
-    # all_backlog['game_genre'] == 'First Person Shooter'
-    # if x['game_genre'] == 'First Person Shooter':
-    # print(x['game_genre'])
-    # print("/!PRINT-TEST!/", all_backlog[0])
 
     if general_list is None:
         raise APIException('You should not be seeing this. Check the route for errors.', status_code=400)
