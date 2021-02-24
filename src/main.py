@@ -43,17 +43,33 @@ def get_all_users():
     return jsonify(response_body), 200
 
 # WIP - Find out how to get filter working for Genres by trying with first_name
-@app.route('/users/name', methods=['GET'])
-def filter_first_name():
+@app.route('/user/<int:user_id>/genre', methods=['GET'])
+def filter_first_name(user_id):
 
     body = request.get_json()
 
-    user_query = User.query.filter_by(first_name='Rolando')
+    print("!!!!!!!!", body)
 
-    if user_query is None:
+    result = db.session.query(Backlog).filter(user_id == user_id)
+    # filter_name = Backlog.query.filter_by(user_id=user_id, game_genre=body['game_genre'])
+    all_backlog = list(map(lambda x: x.serialize(), result))
+    general_list = []
+
+    for x in all_backlog:
+        if x['game_genre'] is not "":
+            general_list.append(x['game_genre'])
+
+    print(general_list)
+
+    # all_backlog['game_genre'] == 'First Person Shooter'
+    # if x['game_genre'] == 'First Person Shooter':
+    # print(x['game_genre'])
+    # print("/!PRINT-TEST!/", all_backlog[0])
+
+    if all_backlog is None:
         raise APIException('You should not be seeing this. Check the route for errors.', status_code=400)
 
-    return jsonify(user_query.serialize()), 200
+    return jsonify(all_backlog.serialize()), 200
 
 # Login & Update
 @app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
