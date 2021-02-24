@@ -185,6 +185,22 @@ def delete_backlog(user_id, backlog_id):
 
     return "Backlog ID deleted.", 200
 
+# Delete a User_ID's Favorite_ID
+@app.route('/favorites', methods=['DELETE'])
+def delete_favorite():
+
+    remove_favorite = Favorites.query.get(favorites_id)
+
+    if remove_favorite is None:
+        raise APIEXception('Favorite list is not found.', status_code=404)
+    
+    db.session.delete(remove_favorite)
+    db.session.commit()
+
+    print(remove_favorite)
+
+    return "Favorite list has been removed", 200
+
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
