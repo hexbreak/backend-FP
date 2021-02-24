@@ -48,6 +48,7 @@ class Backlog(db.Model):
     game_id = db.Column(db.String(250), unique=True, nullable=False)
     game_name = db.Column(db.String(250), unique=False, nullable=False)
     game_platform = db.Column(db.String(250), unique=False, nullable=False)
+    game_genre = db.Column(db.String(250), unique=False, nullable=False)
     game_notes = db.Column(db.String(500), unique=False, default=False, nullable=False)
     progress_status = db.Column(db.Enum(ProgressionStatus))
     now_playing = db.Column(db.Boolean, unique=False, nullable=False)
@@ -62,25 +63,9 @@ class Backlog(db.Model):
             "game_id": self.game_id,
             "game_name": self.game_name,
             "game_platform": self.game_platform,
+            "game_genre": self.game_genre,
             "game_notes": self.game_notes,
             "progress_status": self.progress_status.value
-        }
-
-class Genre(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_backlog_id = db.Column(db.Integer, db.ForeignKey('backlog.id'), nullable=False)
-    game_id = db.Column(db.String(250), unique=True, nullable=False)
-    game_genre = db.Column(db.String(250), unique=True, nullable=False)
-
-    def __repr__(self):
-        return '<Genre %r>' % self.game_genre
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "game_id": self.game_id,
-            "game_genre": self.game_genre
         }
 
 class Favorites(db.Model):

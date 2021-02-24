@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Backlog, Genre, Favorites, AboutMe
+from models import db, User, Backlog, Favorites, AboutMe
 #from models import Person
 
 app = Flask(__name__)
@@ -42,6 +42,18 @@ def get_all_users():
 
     return jsonify(response_body), 200
 
+# WIP - Find out how to get filter working for Genres by trying with first_name
+@app.route('/users/name', methods=['GET'])
+def filter_first_name():
+
+    body = request.get_json()
+
+    user_query = User.query.filter_by(first_name='Rolando')
+
+    if user_query is None:
+        raise APIException('You should not be seeing this. Check the route for errors.', status_code=400)
+
+    return jsonify(user_query.serialize()), 200
 
 # Login & Update
 @app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
@@ -77,6 +89,8 @@ def get_backlog_id(user_id, backlog_id):
             putbacklog.game_name = body['game_name']
         if 'game_platform' in body:
             putbacklog.game_platform = body['game_platform']
+        if 'game_genre' in body:
+            putbacklog.game_notes = body['game_genre']
         if 'game_notes' in body:
             putbacklog.game_notes = body['game_notes']
         if 'progress_status' in body:
@@ -132,6 +146,8 @@ def post_backlog(user_id):
         raise APIException('You need to specify the game name', status_code=400)
     if 'game_platform' not in body:
         raise APIException('You need to specify the game platform', status_code=400)
+    if 'game_genre' not in body:
+        raise APIException('You need to specify the game genre', status_code=400)
     if 'game_notes' not in body:
         raise APIException('You need to specify the game notes', status_code=400)
     if 'progress_status' not in body:
