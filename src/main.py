@@ -48,34 +48,35 @@ def filter_first_name(user_id):
 
     body = request.get_json()
 
-    print("!!!!!!!!", body)
+    print("!/!/body/!/!/", body)
 
-    result = db.session.query(Backlog).filter(user_id == user_id)
+    # result = Backlog.query.filter(user_id == user_id)
+    result = db.session.query(Backlog).filter(Backlog.user_id == user_id)
     # filter_name = Backlog.query.filter_by(user_id=user_id, game_genre=body['game_genre'])
     all_backlog = list(map(lambda x: x.serialize(), result))
     general_list = []
 
     for x in all_backlog:
-        if x['game_genre'] is not "":
+        if x['game_genre'] != "":
             general_list.append(x['game_genre'])
 
-    print(general_list)
+    print("!/!/general_list/!/", general_list)
 
     # all_backlog['game_genre'] == 'First Person Shooter'
     # if x['game_genre'] == 'First Person Shooter':
     # print(x['game_genre'])
     # print("/!PRINT-TEST!/", all_backlog[0])
 
-    if all_backlog is None:
+    if general_list is None:
         raise APIException('You should not be seeing this. Check the route for errors.', status_code=400)
 
-    return jsonify(all_backlog.serialize()), 200
+    return jsonify(general_list), 200
 
 # Login & Update
 @app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
 def get_single_user(user_id):
 
-    body = request.get_json() #{ 'username': 'new_username'}
+    body = request.get_json()
 
     if request.method == 'PUT':
         user1 = User.query.get(user_id)
@@ -106,15 +107,17 @@ def get_backlog_id(user_id, backlog_id):
         if 'game_platform' in body:
             putbacklog.game_platform = body['game_platform']
         if 'game_genre' in body:
-            putbacklog.game_notes = body['game_genre']
+            putbacklog.game_genre = body['game_genre']
         if 'game_notes' in body:
             putbacklog.game_notes = body['game_notes']
         if 'progress_status' in body:
             putbacklog.progress_status = body['progress_status']
         if 'now_playing' in body:
-            putbacklog.nowp_playing = body['now_playing']
+            putbacklog.now_playing = body['now_playing']
         db.session.commit()
         return jsonify(putbacklog.serialize()), 200
+
+        # eventually remmove the if statements for what the user cannot update/change.
 
     if request.method == 'GET':
         getbacklog = Backlog.query.get(backlog_id)
