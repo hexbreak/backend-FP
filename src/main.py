@@ -42,7 +42,7 @@ def get_all_users():
 
     return jsonify(response_body), 200
 
-# WIP - Find out how to get filter working for Genres by trying with first_name
+# WIP - Find out how to get filter working for Genres
 @app.route('/user/<int:user_id>/genre', methods=['GET'])
 def filter_first_name(user_id):
 
@@ -61,15 +61,15 @@ def filter_first_name(user_id):
 
     return jsonify(general_list), 200
 
-# Login & Update
+# Login & Update / id
 @app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
-def get_single_user(user_id):
+def obtain_user_id(user_id):
 
     body = request.get_json()
 
     if request.method == 'PUT':
         user1 = User.query.get(user_id)
-        user1.username = body.username
+        user1.username = body['username']
         db.session.commit()
         return jsonify(user1.serialize()), 200
 
@@ -78,6 +78,21 @@ def get_single_user(user_id):
         return jsonify(user1.serialize()), 200
 
     return 'Invalid Method', 404
+
+# Get / username
+@app.route('/user/<username>', methods=['GET'])
+def obtain_username(username):
+
+    body = request.get_json()
+
+    get_user = User.query.filter_by(username=username)
+    if get_user is None:
+        raise APIException('Username does not exist.', status_code=404)
+    response_body = list(map(lambda x: x.serialize(), get_user))
+    return jsonify(response_body), 200
+    
+    return jsonify(response_body), 200
+
 
 # Obtain & Update Backlog_ID's from a User_ID
 @app.route('/user/<int:user_id>/backlog/<int:backlog_id>', methods=['PUT', 'GET'])
@@ -127,11 +142,13 @@ def post_user():
     if 'email' not in body:
         raise APIException('You need to specify the email', status_code=400)
     if 'password' not in body:
-        raise APIException('You need to specify the password', status_code=400)
+        raise APIException('You need to type down a new password', status_code=400)
     if 'first_name' not in body:
         raise APIException('You need to specify the first name', status_code=400)
     if 'last_name' not in body:
         raise APIException('You need to specify the last name', status_code=400)
+    if 'profile_avatar' not in body:
+        raise APIException('You need to link a avatar for the profile', status_code=400)
 
     user1 = User(username=body['username'], email=body['email'], password=body['password'], first_name=body['first_name'], last_name=body['last_name'], profile_avatar=body['profile_avatar'])
     db.session.add(user1)
@@ -156,6 +173,8 @@ def post_backlog(user_id):
         raise APIException('You need to specify the game platform', status_code=400)
     if 'game_genre' not in body:
         raise APIException('You need to specify the game genre', status_code=400)
+    if 'game_tags' not in body:
+        raise APIException('You need to specify the game tags', status_code=400)
     if 'game_notes' not in body:
         raise APIException('You need to specify the game notes', status_code=400)
     if 'progress_status' not in body:
@@ -163,7 +182,7 @@ def post_backlog(user_id):
     if 'now_playing' not in body:
         raise APIException('You need to specify true or false for now playing', status_code=400)
 
-    backlog1 = Backlog(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'], game_platform=body['game_platform'], game_notes=body['game_notes'], progress_status=body['progress_status'], now_playing=body['now_playing'])
+    backlog1 = Backlog(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'], game_platform=body['game_platform'], game_genre=body['game_genre'], game_tags=body['game_tags'], game_notes=body['game_notes'], progress_status=body['progress_status'], now_playing=body['now_playing'])
     db.session.add(backlog1)
     db.session.commit()
 
@@ -196,8 +215,6 @@ def delete_favorite():
     
     db.session.delete(remove_favorite)
     db.session.commit()
-
-    print(remove_favorite)
 
     return "Favorite list has been removed", 200
 

@@ -17,8 +17,6 @@ class User(db.Model):
     backlogs = db.relationship('Backlog', backref='user', lazy=True)
     abouts = db.relationship('AboutMe', backref='user', lazy=True)
     favlist = db.relationship('Favorites', backref='user', lazy=True)
-    
-    # Work on Many-to-Many Relationships for favlist & tags class.
 
     def __repr__(self):
         return '<User %r>' % self.id
@@ -55,6 +53,7 @@ class Backlog(db.Model):
     game_name = db.Column(db.String(250), unique=False, nullable=False)
     game_platform = db.Column(db.String(250), unique=False, nullable=False)
     game_genre = db.Column(db.String(250), unique=False, nullable=False)
+    game_tags = db.Column(db.String(250), unique=False, nullable=False)
     game_notes = db.Column(db.String(500), unique=False, default=False, nullable=False)
     progress_status = db.Column(db.Enum(ProgressionStatus))
     now_playing = db.Column(db.Boolean, unique=False, nullable=False)
@@ -71,6 +70,7 @@ class Backlog(db.Model):
             "game_name": self.game_name,
             "game_platform": self.game_platform,
             "game_genre": self.game_genre,
+            "game_tags": self.game_tags,
             "game_notes": self.game_notes,
             "progress_status": self.progress_status.value
         }
@@ -90,7 +90,8 @@ class Favorites(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "game_id": self.game_id,
-            "game_name": self.game_name
+            "game_name": self.game_name,
+            "list_name": self.list_name
         }
 
 class AboutMe(db.Model):
@@ -106,20 +107,4 @@ class AboutMe(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "about_box": self.about_box
-        }
-
-class Tags(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user_tags = db.Column(db.String(25), unique=True, nullable=False, default=True)
-    
-
-    def __repr__(self):
-        return '<Tags %r>' % self.user_tags
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "user_tags": self.user_tags
         }
