@@ -42,7 +42,7 @@ def get_all_users():
 
     return jsonify(response_body), 200
 
-# WIP - Find out how to get filter working for Genres
+# WIP - Filter Genre with id
 @app.route('/user/<int:user_id>/genre', methods=['GET'])
 def filter_first_name(user_id):
 
@@ -60,6 +60,22 @@ def filter_first_name(user_id):
         raise APIException('You should not be seeing this. Check the route for errors.', status_code=400)
 
     return jsonify(general_list), 200
+
+# WIP - Filter Tags with id
+@app.route('/user/<int:user_id>/tags', methods=['GET'])
+def filter_user_tags(user_id):
+
+    body = request.get_json()
+
+    user_tags = db.session.query(Backlog).filter(Backlog.user_id == user_id)
+    response_body = list(map(lambda x: x.serialize(), user_tags))
+    tag_list = []
+    
+    for x in response_body:
+        if x['game_tags'] != "":
+            tag_list.append(x['game_tags'])
+    
+    return jsonify(tag_list), 200
 
 # Login & Update / id
 @app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
@@ -84,7 +100,7 @@ def obtain_user_id(user_id):
         user1 = User.query.get(user_id)
         return jsonify(user1.serialize()), 200
 
-    return 'Invalid Method', 404
+    return 'Should look good', 200
 
 # Get / username
 @app.route('/user/<username>', methods=['GET'])
