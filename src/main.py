@@ -69,7 +69,14 @@ def obtain_user_id(user_id):
 
     if request.method == 'PUT':
         user1 = User.query.get(user_id)
-        user1.username = body['username']
+        if user1 is None:
+            raise APIException('Backlog ID not found', status_code=404)
+        if 'first_name' in body:
+            user1.first_name = body['first_name']
+        if 'last_name' in body:
+            user1.last_name = body['last_name']
+        if 'profile_avatar' in body:
+            user1.profile_avatar = body['profile_avatar']
         db.session.commit()
         return jsonify(user1.serialize()), 200
 
@@ -84,12 +91,10 @@ def obtain_user_id(user_id):
 def obtain_username(username):
 
     body = request.get_json()
-
     get_user = User.query.filter_by(username=username)
     if get_user is None:
         raise APIException('Username does not exist.', status_code=404)
     response_body = list(map(lambda x: x.serialize(), get_user))
-    return jsonify(response_body), 200
     
     return jsonify(response_body), 200
 
