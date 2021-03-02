@@ -196,8 +196,12 @@ def post_backlog(user_id):
         raise APIException('You need to specify the game genre', status_code=400)
     if 'game_tags' not in body:
         raise APIException('You need to specify the game tags', status_code=400)
+    if 'progress_status' not in body:
+        raise APIException('You need to specify the progress condition: NEW, PROGRESSING, FINISHED, COMPLETED')
+    if 'now_playing' not in body:
+        raise APIException ('you need to specify the condition status of the game: true or false')
 
-    backlog1 = Backlog(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'], game_platform=body['game_platform'], game_genre=body['game_genre'], game_tags=body['game_tags'])
+    backlog1 = Backlog(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'], game_platform=body['game_platform'], game_genre=body['game_genre'], game_tags=body['game_tags'], progress_status=body['progress_status'], now_playing=body['now_playing'])
     db.session.add(backlog1)
     db.session.commit()
 

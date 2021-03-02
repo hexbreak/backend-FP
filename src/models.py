@@ -51,14 +51,12 @@ class Backlog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     game_id = db.Column(db.String(250), unique=True, nullable=False)
     game_name = db.Column(db.String(250), unique=False, nullable=False)
-    game_platform = db.Column(db.String(250), unique=False, nullable=False)
-    game_genre = db.Column(db.String(250), unique=False, nullable=False)
-    game_tags = db.Column(db.String(250), unique=False, nullable=False)
+    game_platform = db.Column(db.String(500), unique=False, nullable=False)
+    game_genre = db.Column(db.String(500), unique=False, nullable=False)
+    game_tags = db.Column(db.String(99999), unique=False, nullable=False)
     game_notes = db.Column(db.String(500), unique=False, default=False, nullable=False)
     progress_status = db.Column(db.Enum(ProgressionStatus))
     now_playing = db.Column(db.Boolean, unique=False, nullable=False)
-    # split the game_tags to be a one-to-many? Last minute change.
-    # add arrays to allow matrix for platofrm, genre & tagss
 
     def __repr__(self):
         return '<Backlog %r>' % self.user_id
