@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: cd284f13d06f
+Revision ID: ed76609b0eee
 Revises: 
-Create Date: 2021-03-02 00:09:50.977209
+Create Date: 2021-03-03 23:22:44.523882
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'cd284f13d06f'
+revision = 'ed76609b0eee'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -44,10 +44,10 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('game_id', sa.String(length=250), nullable=False),
     sa.Column('game_name', sa.String(length=250), nullable=False),
-    sa.Column('game_platform', sa.String(length=250), nullable=False),
-    sa.Column('game_genre', sa.String(length=250), nullable=False),
-    sa.Column('game_tags', sa.String(length=250), nullable=False),
-    sa.Column('game_notes', sa.String(length=500), nullable=False),
+    sa.Column('game_platform', sa.String(length=750), nullable=False),
+    sa.Column('game_genre', sa.String(length=750), nullable=False),
+    sa.Column('game_tags', sa.String(length=750), nullable=False),
+    sa.Column('game_notes', sa.String(length=750), nullable=False),
     sa.Column('progress_status', sa.Enum('NEW', 'PROGRESSING', 'FINISHED', 'COMPLETED', name='progressionstatus'), nullable=True),
     sa.Column('now_playing', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
