@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Platform, Highlights, NowPlaying, FavoriteList
+from models import db, User, Platform, Highlights, NowPlaying, FavoriteList, Liked, Disliked
 #from models import Person
 
 app = Flask(__name__)
@@ -51,13 +51,11 @@ def obtain_user_id(user_id):
     if request.method == 'PUT':
         user1 = User.query.get(user_id)
         if user1 is None:
-            raise APIException('Backlog ID not found', status_code=404)
-        if 'first_name' in body:
-            user1.first_name = body['first_name']
-        if 'last_name' in body:
-            user1.last_name = body['last_name']
-        if 'profile_avatar' in body:
-            user1.profile_avatar = body['profile_avatar']
+            raise APIException('User ID not found', status_code=404)
+        if 'about' in body:
+            user1.about = body['about']
+        if 'image' in body:
+            user1.image = body['image']
         db.session.commit()
         return jsonify(user1.serialize()), 200
 
@@ -78,6 +76,47 @@ def obtain_username(username):
     response_body = list(map(lambda x: x.serialize(), get_user))
     
     return jsonify(response_body), 200
+
+@app.route('/user/<int:user_id>/addfav', methods=['POST'])
+def obtain_favorites(user_id):
+
+    body = request.get_json()
+    
+    if body is None:
+        raise APIException("Body is empty, need: game_name & game_id.", status_code=400)
+    if 'game_name' not in body:
+        raise APIException("Missing game_name.", status_code=400)
+    if 'game_id' not in body:
+        raise APIException("Missing game_id.", status_code=400)
+    
+    favoritelist1 = FavoriteList(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'])
+    db.session.add(favoritelist1)
+    db.session.commit()
+    response_body = favoritelist1.serialize()
+
+    print("/ print test for /", favoritelist1.serialize())
+
+    return jsonify(response_body), 200
+
+
+# # WIP - Filter Genre with id
+# @app.route('/user/<int:user_id>/genre', methods=['GET'])
+# def filter_first_name(user_id):
+
+#     body = request.get_json()
+
+#     result = db.session.query(Backlog).filter(Backlog.user_id == user_id)
+#     all_backlog = list(map(lambda x: x.serialize(), result))
+#     general_list = []
+
+#     for x in all_backlog:
+#         if x['game_genre'] != "":
+#             general_list.append(x['game_genre'])
+
+#     if general_list is None:
+#         raise APIException('You should not be seeing this. Check the route for errors.', status_code=400)
+
+#     return jsonify(general_list), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
