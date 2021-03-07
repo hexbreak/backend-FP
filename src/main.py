@@ -77,6 +77,7 @@ def obtain_username(username):
     
     return jsonify(response_body), 200
 
+# Add a game to favorites
 @app.route('/user/<int:user_id>/addfav', methods=['POST'])
 def add_favorites(user_id):
 
@@ -98,6 +99,7 @@ def add_favorites(user_id):
 
     return jsonify(response_body), 200
 
+# Get favorite list as an array
 @app.route('/user/<int:user_id>/fav', methods=['GET'])
 def get_favorites(user_id):
 
@@ -112,6 +114,21 @@ def get_favorites(user_id):
             fav_list.append(x['game_name'])
 
     return jsonify(fav_list), 200
+
+# Add a tag to liked list
+@app.route('/user/<int:user_id>/like', methods=['POST'])
+def addtags_liked(user_id):
+
+    body = request.get_json()
+
+    liked1 = Liked(user_id=user_id, tag_name=body['tag_name'], tag_id=body['tag_id'])
+    db.session.add(liked1)
+    db.session.commit()
+    response_body = liked1.serialize()
+
+    print("/ print test for /", liked1.serialize())
+
+    return jsonify(response_body), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
