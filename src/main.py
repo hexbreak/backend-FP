@@ -175,6 +175,21 @@ def addtags_dislike(user_id):
 
     return jsonify(response_body)
 
+# Get Disliked tags listed in array
+@app.route('/user/<int:user_id>/disliked', methods=['GET'])
+def gettags_disliked(user_id):
+
+    body = request.get_json()
+
+    get_dislikes = db.session.query(Disliked).filter(Disliked.user_id == user_id)
+    response_body = list(map(lambda x: x.serialize(), get_dislikes))
+    dislikes_list = []
+
+    for x in response_body:
+        if x['tag_name'] != "":
+            dislikes_list.append(x['tag_name'])
+
+    return jsonify(dislikes_list), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
