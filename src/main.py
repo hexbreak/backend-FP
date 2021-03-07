@@ -78,7 +78,7 @@ def obtain_username(username):
     return jsonify(response_body), 200
 
 @app.route('/user/<int:user_id>/addfav', methods=['POST'])
-def obtain_favorites(user_id):
+def add_favorites(user_id):
 
     body = request.get_json()
     
@@ -98,25 +98,20 @@ def obtain_favorites(user_id):
 
     return jsonify(response_body), 200
 
+@app.route('/user/<int:user_id>/fav', methods=['GET'])
+def get_favorites(user_id):
 
-# # WIP - Filter Genre with id
-# @app.route('/user/<int:user_id>/genre', methods=['GET'])
-# def filter_first_name(user_id):
+    body = request.get_json()
+    
+    get_fav = db.session.query(FavoriteList).filter(FavoriteList.user_id == user_id)
+    response_body = list(map(lambda x: x.serialize(), get_fav))
+    fav_list = []
 
-#     body = request.get_json()
+    for x in response_body:
+        if x['game_name'] != "":
+            fav_list.append(x['game_name'])
 
-#     result = db.session.query(Backlog).filter(Backlog.user_id == user_id)
-#     all_backlog = list(map(lambda x: x.serialize(), result))
-#     general_list = []
-
-#     for x in all_backlog:
-#         if x['game_genre'] != "":
-#             general_list.append(x['game_genre'])
-
-#     if general_list is None:
-#         raise APIException('You should not be seeing this. Check the route for errors.', status_code=400)
-
-#     return jsonify(general_list), 200
+    return jsonify(fav_list), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
