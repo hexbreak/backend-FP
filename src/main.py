@@ -95,11 +95,11 @@ def add_favorites(user_id):
     db.session.commit()
     response_body = favoritelist1.serialize()
 
-    print("/ print test for /", favoritelist1.serialize())
+    print("/ print test for /", response_body)
 
     return jsonify(response_body), 200
 
-# Get favorite list as an array
+# Get favorite listed in array
 @app.route('/user/<int:user_id>/fav', methods=['GET'])
 def get_favorites(user_id):
 
@@ -115,9 +115,9 @@ def get_favorites(user_id):
 
     return jsonify(fav_list), 200
 
-# Add a tag to liked list
+# Add a tag to liked tags
 @app.route('/user/<int:user_id>/like', methods=['POST'])
-def addtags_liked(user_id):
+def addtags_like(user_id):
 
     body = request.get_json()
 
@@ -125,7 +125,7 @@ def addtags_liked(user_id):
         raise APIException("Body is empty, need: tag_name & tag_id.", status_code=400)
     if 'tag_name' not in body:
         raise APIException("Missing tag_name.", status_code=400)
-    if 'game_id' not in body:
+    if 'tag_id' not in body:
         raise APIException("Missing tag_id.", status_code=400)
 
     liked1 = Liked(user_id=user_id, tag_name=body['tag_name'], tag_id=body['tag_id'])
@@ -133,10 +133,11 @@ def addtags_liked(user_id):
     db.session.commit()
     response_body = liked1.serialize()
 
-    print("/ print test for /", liked1.serialize())
+    print("/ print test for /", response_body)
 
     return jsonify(response_body), 200
 
+# Get Liked tags listed in array
 @app.route('/user/<int:user_id>/liked', methods=['GET'])
 def gettags_liked(user_id):
 
@@ -151,6 +152,29 @@ def gettags_liked(user_id):
             likes_list.append(x['tag_name'])
 
     return jsonify(likes_list), 200
+
+# Add a tag to disliked tags
+@app.route('/user/<int:user_id>/dislike', methods=['POST'])
+def addtags_dislike(user_id):
+
+    body = request.get_json()
+
+    if body is None:
+        raise APIException("Body is empty, need: tag_name & tag_id.", status_code=400)
+    if 'tag_name' not in body:
+        raise APIException("Missing tag_name.", status_code=400)
+    if 'tag_id' not in body:
+        raise APIException("Missing tag_id.", status_code=400)
+
+    dislike1 = Disliked(user_id=user_id, tag_name=body['tag_name'], tag_id=body['tag_id'])
+    db.session.add(dislike1)
+    db.session.commit()
+    response_body = dislike1.serialize()
+
+    print("/ print test for /", response_body)
+
+    return jsonify(response_body)
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
