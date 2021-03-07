@@ -121,6 +121,13 @@ def addtags_liked(user_id):
 
     body = request.get_json()
 
+    if body is None:
+        raise APIException("Body is empty, need: tag_name & tag_id.", status_code=400)
+    if 'tag_name' not in body:
+        raise APIException("Missing tag_name.", status_code=400)
+    if 'game_id' not in body:
+        raise APIException("Missing tag_id.", status_code=400)
+
     liked1 = Liked(user_id=user_id, tag_name=body['tag_name'], tag_id=body['tag_id'])
     db.session.add(liked1)
     db.session.commit()
@@ -129,6 +136,21 @@ def addtags_liked(user_id):
     print("/ print test for /", liked1.serialize())
 
     return jsonify(response_body), 200
+
+@app.route('/user/<int:user_id>/liked', methods=['GET'])
+def gettags_liked(user_id):
+
+    body = request.get_json()
+
+    get_likes = db.session.query(Liked).filter(Liked.user_id == user_id)
+    response_body = list(map(lambda x: x.serialize(), get_likes))
+    likes_list = []
+
+    for x in response_body:
+        if x['tag_name'] != "":
+            likes_list.append(x['tag_name'])
+
+    return jsonify(likes_list), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
