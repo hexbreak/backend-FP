@@ -312,6 +312,43 @@ def postget_highlight(user_id):
 
     return "Ok!", 200
 
+# Update / Delete Platforms
+@app.route('/user/<int:user_id>/hl/<int:hl_id>', methods=['PUT', 'DELETE'])
+def putdel_highlight(user_id, hl_id):
+
+    body = request.get_json()
+
+    if request.method == 'PUT':
+        put_hl = Highlights.query.get(hl_id)
+        if put_hl is None:
+            raise APIException("Body is empty, need: platform_name & platform_id", status_code=404)
+        if 'game_name' in body:
+            put_hl.game_name = body['game_name']
+        if 'game_id' in body:
+            put_hl.game_id = body['game_id']
+        db.session.commit()
+        response_body = put_hl.serialize()
+
+        print("/ print test for /", response_body)
+
+        return jsonify(response_body), 200
+
+    if request.method == 'DELETE':
+        del_hl = Highlights.query.get(hl_id)
+        if del_hl is None:
+            raise APIException("Game not found.", status_code=404)
+        db.session.delete(del_hl)
+        db.session.commit()
+
+        hl_list = Highlights.query.all()
+        response_body = list(map(lambda x: x.serialize(), hl_list))
+        
+        print("/ print test for /", response_body)
+
+        return jsonify(response_body), 200
+    
+    return "Ok!", 200
+
 # Add a tag to liked tags
 @app.route('/user/<int:user_id>/like', methods=['POST'])
 def addtags_like(user_id):
