@@ -101,6 +101,22 @@ def add_playing(user_id):
 
     return jsonify(response_body), 200
 
+# Get games on playing
+@app.route('/user/<int:user_id>/nplay', methods=['GET'])
+def get_playing(user_id):
+
+    body = request.get_json()
+    
+    get_play = db.session.query(NowPlaying).filter(NowPlaying.user_id == user_id)
+    response_body = list(map(lambda x: x.serialize(), get_play))
+    play_list = []
+
+    for x in response_body:
+        if x['game_name'] != "":
+            play_list.append(x['game_name'])
+
+    return jsonify(play_list), 200
+
 # Add a game to favorites
 @app.route('/user/<int:user_id>/addfav', methods=['POST'])
 def add_favorites(user_id):
