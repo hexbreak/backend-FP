@@ -276,6 +276,42 @@ def putdel_platform(user_id, plat_id):
     
     return "Ok!", 200
 
+# Post / Get a game in Highlights
+@app.route('/user/<int:user_id>/hl', methods=['POST', 'GET'])
+def postget_highlight(user_id):
+
+    body = request.get_json()
+
+    if request.method == 'POST':
+        if body is None:
+            raise APIException("Body is empty, need: game_name & game_id", status_code=404)
+        if 'game_name' not in body:
+            raise APIException("Missing game_name", status_code=404)
+        if 'game_id' not in body:
+            raise APIException("Missing game_id", status_code=404)
+        
+        highlight1 = Highlights(user_id=user_id, game_name=body['game_name'], game_id=body['game_id'])
+        db.session.add(highlight1)
+        db.session.commit()
+        response_body = highlight1.serialize()
+
+        print("/ print test for /", response_body)
+
+        return jsonify(response_body)
+    
+    if request.method == 'GET':
+        get_hl = db.session.query(Highlights).filter(Highlights.user_id == user_id)
+        response_body = list(map(lambda x: x.serialize(), get_hl))
+        hl_list = []
+
+        for x in response_body:
+            if x['game_name'] != "":
+                hl_list.append(x['game_name'])
+
+        return jsonify(hl_list), 200
+
+    return "Ok!", 200
+
 # Add a tag to liked tags
 @app.route('/user/<int:user_id>/like', methods=['POST'])
 def addtags_like(user_id):
