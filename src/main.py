@@ -107,15 +107,27 @@ def get_playing(user_id):
 
     body = request.get_json()
     
-    get_play = db.session.query(NowPlaying).filter(NowPlaying.user_id == user_id)
+    get_play = NowPlaying.query.all()
     response_body = list(map(lambda x: x.serialize(), get_play))
-    play_list = []
 
-    for x in response_body:
-        if x['game_name'] != "":
-            play_list.append(x['game_name'])
+    return jsonify(response_body), 200
 
-    return jsonify(play_list), 200
+# Update notes on playing
+@app.route('/user/<int:user_id>/nplay/<int:playing_id>', methods=['PUT'])
+def update_playing(user_id, playing_id):
+
+    body = request.get_json()
+
+    updateplay = NowPlaying.query.get(playing_id)
+    if updateplay is None:
+        raise APIException("Change notes for update.", status_code=404)
+    if 'notes' in body:
+        updateplay.notes = body['notes']
+    db.session.commit()
+
+    print("/ print test for /", updateplay.serialize())
+
+    return jsonify(updateplay.serialize()), 200
 
 # Delete a game from playing
 @app.route('/user/<int:user_id>/nplay/<int:playing_id>', methods=['DELETE'])
