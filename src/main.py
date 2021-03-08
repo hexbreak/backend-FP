@@ -170,6 +170,23 @@ def gettags_liked(user_id):
 
     return jsonify(likes_list), 200
 
+# Delete a Liked tag
+@app.route('/user/<int:user_id>/liked/<int:liked_id>', methods=['DELETE'])
+def deltags_liked(user_id, liked_id):
+
+    del_like = Liked.query.get(liked_id)
+    if del_like is None:
+        raise APIException ('Tag not found in Liked Tags', status_code=404)
+    db.session.delete(del_like)
+    db.session.commit()
+
+    tag_list = Liked.query.all()
+    response_body = list(map(lambda x: x.serialize(), tag_list))
+    
+    print("/ print test for /", response_body)
+
+    return jsonify(response_body), 200
+
 # Add a tag to disliked tags
 @app.route('/user/<int:user_id>/dislike', methods=['POST'])
 def addtags_dislike(user_id):
