@@ -77,6 +77,30 @@ def obtain_username(username):
     
     return jsonify(response_body), 200
 
+# Add a game for playing
+@app.route('/user/<int:user_id>/nplay', methods=['POST'])
+def add_playing(user_id):
+
+    body = request.get_json()
+
+    if body is None:
+        raise APIException("Body is empty, need: game_name & game_id.", status_code=404)
+    if 'game_name' not in body:
+        raise APIException("Missing game_name.", status_code=404)
+    if 'game_id' not in body:
+        raise APIException("Missing game_id", status_code=404)
+    if 'notes' not in body:
+        raise APIException("Missing notes, leave an empty string.", status_code=404)
+    
+    nowplaying1 = NowPlaying(user_id=user_id, game_name=body['game_name'], game_id=body['game_id'], notes=body['notes'])
+    db.session.add(nowplaying1)
+    db.session.commit()
+    response_body = nowplaying1.serialize()
+
+    print("/ print test for /", response_body)
+
+    return jsonify(response_body), 200
+
 # Add a game to favorites
 @app.route('/user/<int:user_id>/addfav', methods=['POST'])
 def add_favorites(user_id):
