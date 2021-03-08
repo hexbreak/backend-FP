@@ -124,10 +124,11 @@ def update_playing(user_id, playing_id):
     if 'notes' in body:
         updateplay.notes = body['notes']
     db.session.commit()
+    response_body = updateplay.serialize()
 
-    print("/ print test for /", updateplay.serialize())
+    print("/ print test for /", response_body)
 
-    return jsonify(updateplay.serialize()), 200
+    return jsonify(response_body), 200
 
 # Delete a game from playing
 @app.route('/user/<int:user_id>/nplay/<int:playing_id>', methods=['DELETE'])
@@ -200,6 +201,80 @@ def delete_favorite(user_id, favoritelist_id):
     print("/ print test for /", response_body)
 
     return jsonify(response_body), 200
+
+# Add / Get Platforms
+@app.route('/user/<int:user_id>/plat', methods=['POST', 'GET'])
+def add_platform(user_id):
+
+    body = request.get_json()
+
+    if request.method == 'POST':
+        if body is None:
+            raise APIException("Body is empty, need: platform_name & platform_id", status_code=404)
+        if 'platform_name' not in body:
+            raise APIException("Missing platform_name", status_code=404)
+        if 'platform_id' not in body:
+            raise APIException("Missing platform_id", status_code=404)
+        
+        platform1 = Platform(user_id=user_id, platform_name=body['platform_name'], platform_id=body['platform_id'])
+        db.session.add(platform1)
+        db.session.commit()
+        response_body = platform1.serialize()
+
+        print("/ print test for /", response_body)
+
+        return jsonify(response_body)
+    
+    if request.method == 'GET':
+        get_plat = db.session.query(Platform).filter(Platform.user_id == user_id)
+        response_body = list(map(lambda x: x.serialize(), get_plat))
+        plat_list = []
+
+        for x in response_body:
+            if x['platform_name'] != "":
+                plat_list.append(x['platform_name'])
+
+        return jsonify(plat_list), 200
+    
+    return "Ok!", 200
+        
+
+# Update / Delete Platforms
+@app.route('/user/<int:user_id>/plat/<int:plat_id>', methods=['PUT', 'DELETE'])
+def putdel_platform(user_id, plat_id):
+
+    body = request.get_json()
+
+    if request.method == 'PUT':
+        put_plat = Platform.query.get(plat_id)
+        if put_plat is None:
+            raise APIException("Body is empty, need: platform_name & platform_id", status_code=404)
+        if 'platform_name' in body:
+            put_plat.platform_name = body['platform_name']
+        if 'platform_id' in body:
+            put_plat.platform_id = body['platform_id']
+        db.session.commit()
+        response_body = put_plat.serialize()
+
+        print("/ print test for /", response_body)
+
+        return jsonify(response_body), 200
+
+    if request.method == 'DELETE':
+        del_plat = Platform.query.get(plat_id)
+        if del_plat is None:
+            raise APIException("Platform not found.", status_code=404)
+        db.session.delete(del_plat)
+        db.session.commit()
+
+        plat_list = Platform.query.all()
+        response_body = list(map(lambda x: x.serialize(), plat_list))
+        
+        print("/ print test for /", response_body)
+
+        return jsonify(response_body), 200
+    
+    return "Ok!", 200
 
 # Add a tag to liked tags
 @app.route('/user/<int:user_id>/like', methods=['POST'])
