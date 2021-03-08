@@ -225,6 +225,23 @@ def gettags_disliked(user_id):
 
     return jsonify(dislikes_list), 200
 
+# Delete a Disliked tag
+@app.route('/user/<int:user_id>/disliked/<int:disliked_id>', methods=['DELETE'])
+def deltags_dislike(user_id, disliked_id):
+
+    del_dislike = Disliked.query.get(disliked_id)
+    if del_dislike is None:
+        raise APIException ('Tag not found in Disliked Tags', status_code=404)
+    db.session.delete(del_dislike)
+    db.session.commit()
+
+    tag_list = Disliked.query.all()
+    response_body = list(map(lambda x: x.serialize(), tag_list))
+    
+    print("/ print test for /", response_body)
+
+    return jsonify(response_body), 200
+
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
