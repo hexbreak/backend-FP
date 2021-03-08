@@ -115,6 +115,23 @@ def get_favorites(user_id):
 
     return jsonify(fav_list), 200
 
+# Delete a game from favorite list
+@app.route('/user/<int:user_id>/fav/<int:favoritelist_id>', methods=['DELETE'])
+def delete_favorite(user_id, favoritelist_id):
+    
+    remove_favorite = FavoriteList.query.get(favoritelist_id)
+    if remove_favorite is None:
+        raise APIException ('Game not found in Favorite List', status_code=404)
+    db.session.delete(remove_favorite)
+    db.session.commit()
+
+    new_list = FavoriteList.query.all()
+    response_body = list(map(lambda x: x.serialize(), new_list))
+    
+    print("/ print test for /", response_body)
+
+    return jsonify(response_body), 200
+
 # Add a tag to liked tags
 @app.route('/user/<int:user_id>/like', methods=['POST'])
 def addtags_like(user_id):
