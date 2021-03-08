@@ -149,7 +149,7 @@ def del_playing(user_id, playing_id):
 
 # Add a game to favorites
 @app.route('/user/<int:user_id>/fav', methods=['POST', 'GET'])
-def add_favorites(user_id):
+def addget_fav(user_id):
 
     body = request.get_json()
     
@@ -184,21 +184,41 @@ def add_favorites(user_id):
     return "Ok!", 200
 
 # Delete a game from favorite list
-@app.route('/user/<int:user_id>/fav/<int:favoritelist_id>', methods=['DELETE'])
-def delete_favorite(user_id, favoritelist_id):
-    
-    remove_favorite = FavoriteList.query.get(favoritelist_id)
-    if remove_favorite is None:
-        raise APIException ('Game not found in Favorite List', status_code=404)
-    db.session.delete(remove_favorite)
-    db.session.commit()
+@app.route('/user/<int:user_id>/fav/<int:favoritelist_id>', methods=['PUT','DELETE'])
+def putdel_fav(user_id, favoritelist_id):
 
-    new_list = FavoriteList.query.all()
-    response_body = list(map(lambda x: x.serialize(), new_list))
-    
-    print("/ print test for /", response_body)
+    body = request.get_json()
 
-    return jsonify(response_body), 200
+    if request.method == 'PUT':
+        put_fav = FavoriteList.query.get(favoritelist_id)
+        if put_fav is None:
+            raise APIException("Body is empty, need: game_name & game_id", status_code=404)
+        if 'game_name' in body:
+            put_fav.game_name = body['game_name']
+        if 'game_id' in body:
+            put_fav.game_id = body['game_id']
+        db.session.commit()
+        response_body = put_fav.serialize()
+
+        print("/ print test for /", response_body)
+
+        return jsonify(response_body), 200
+    
+    if request.method == 'DELETE':
+        remove_favorite = FavoriteList.query.get(favoritelist_id)
+        if remove_favorite is None:
+            raise APIException ('Game not found in Favorite List', status_code=404)
+        db.session.delete(remove_favorite)
+        db.session.commit()
+
+        new_list = FavoriteList.query.all()
+        response_body = list(map(lambda x: x.serialize(), new_list))
+        
+        print("/ print test for /", response_body)
+
+        return jsonify(response_body), 200
+    
+    return "Ok!", 200
 
 # Add / Get Platforms
 @app.route('/user/<int:user_id>/plat', methods=['POST', 'GET'])
