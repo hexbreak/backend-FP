@@ -148,42 +148,40 @@ def del_playing(user_id, playing_id):
     return jsonify(response_body), 200
 
 # Add a game to favorites
-@app.route('/user/<int:user_id>/addfav', methods=['POST'])
+@app.route('/user/<int:user_id>/fav', methods=['POST', 'GET'])
 def add_favorites(user_id):
 
     body = request.get_json()
     
-    if body is None:
-        raise APIException("Body is empty, need: game_name & game_id.", status_code=400)
-    if 'game_name' not in body:
-        raise APIException("Missing game_name.", status_code=400)
-    if 'game_id' not in body:
-        raise APIException("Missing game_id.", status_code=400)
+    if request.method == 'POST':
+        if body is None:
+            raise APIException("Body is empty, need: game_name & game_id.", status_code=400)
+        if 'game_name' not in body:
+            raise APIException("Missing game_name.", status_code=400)
+        if 'game_id' not in body:
+            raise APIException("Missing game_id.", status_code=400)
+        
+        favoritelist1 = FavoriteList(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'])
+        db.session.add(favoritelist1)
+        db.session.commit()
+        response_body = favoritelist1.serialize()
+
+        print("/ print test for /", response_body)
+
+        return jsonify(response_body), 200
     
-    favoritelist1 = FavoriteList(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'])
-    db.session.add(favoritelist1)
-    db.session.commit()
-    response_body = favoritelist1.serialize()
+    if request.method == 'GET':
+        get_fav = db.session.query(FavoriteList).filter(FavoriteList.user_id == user_id)
+        response_body = list(map(lambda x: x.serialize(), get_fav))
+        fav_list = []
 
-    print("/ print test for /", response_body)
+        for x in response_body:
+            if x['game_name'] != "":
+                fav_list.append(x['game_name'])
 
-    return jsonify(response_body), 200
-
-# Get favorite listed in array
-@app.route('/user/<int:user_id>/fav', methods=['GET'])
-def get_favorites(user_id):
-
-    body = request.get_json()
+        return jsonify(fav_list), 200
     
-    get_fav = db.session.query(FavoriteList).filter(FavoriteList.user_id == user_id)
-    response_body = list(map(lambda x: x.serialize(), get_fav))
-    fav_list = []
-
-    for x in response_body:
-        if x['game_name'] != "":
-            fav_list.append(x['game_name'])
-
-    return jsonify(fav_list), 200
+    return "Ok!", 200
 
 # Delete a game from favorite list
 @app.route('/user/<int:user_id>/fav/<int:favoritelist_id>', methods=['DELETE'])
