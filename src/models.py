@@ -91,7 +91,7 @@ class FavoriteList(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     game_name = db.Column(db.String(250), unique=False, nullable=True)
-    game_id = db.Column(db.String(120), unique=False, nullable=True)
+    game_id = db.Column(db.String(120), unique=True, nullable=True)
 
     def __repr__(self):
         return '<FavoriteList %r>' % self.user_id

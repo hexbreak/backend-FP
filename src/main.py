@@ -390,7 +390,7 @@ def addtags_like(user_id):
     return jsonify(response_body), 200
 
 # Get Liked tags listed in array
-@app.route('/user/<int:user_id>/liked', methods=['GET'])
+@app.route('/user/<int:user_id>/like', methods=['GET'])
 def gettags_liked(user_id):
 
     body = request.get_json()
@@ -406,7 +406,7 @@ def gettags_liked(user_id):
     return jsonify(likes_list), 200
 
 # Delete a Liked tag
-@app.route('/user/<int:user_id>/liked/<int:liked_id>', methods=['DELETE'])
+@app.route('/user/<int:user_id>/like/<int:liked_id>', methods=['DELETE'])
 def deltags_liked(user_id, liked_id):
 
     del_like = Liked.query.get(liked_id)
@@ -445,7 +445,7 @@ def addtags_dislike(user_id):
     return jsonify(response_body)
 
 # Get Disliked tags listed in array
-@app.route('/user/<int:user_id>/disliked', methods=['GET'])
+@app.route('/user/<int:user_id>/dislike', methods=['GET'])
 def gettags_disliked(user_id):
 
     body = request.get_json()
