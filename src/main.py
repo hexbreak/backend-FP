@@ -97,27 +97,55 @@ def put_editprofile(username, id):
 
     body = request.get_json()
 
+    # putPlat = Platform.query.get(id)
+    # print(putPlat.platform_name)
+    # print("/ PLATFORM ID", body[])
+
     nplay = NowPlaying.query.get(id)
-    print(nplay.game_id)
+    print(nplay.game_name)
     print("/ GAME ID", body['playing'][0]['game_id'])
     if nplay is None:
         raise APIException('Game ID not found', status_code=404)
     if 'game_id' in body['playing'][0]:
         nplay.game_id = body['playing'][0]['game_id'] # all the paths to the properties should look something like this and also in the validations/if statements
-    if 'game_name' in body:
-        nplay.game_name = body['game_name']
-    if 'notes' in body:
-        nplay.notes = body['notes']
+    if 'game_name' in body['playing'][0]:
+        nplay.game_name = body['playing'][0]['game_name']
+    if 'notes' in body['playing'][0]:
+        nplay.notes = body['playing'][0]['notes']
     db.session.commit()
 
     newHl = Highlights.query.get(id)
     if newHl is None:
         raise APIException('Game ID not found', status_code=404)
-    if 'game_id' in body:
-        newHl.game_id = body['game_id']
-    if 'game_name' in body:
-        newHl.game_name = body['game_name']
+    if 'game_id' in body['highlight'][0]:
+        newHl.game_id = body['highlight'][0]['game_id']
+    if 'game_name' in body['highlight'][0]:
+        newHl.game_name = body['highlight'][0]['game_name']
     db.session.commit()
+
+    newLike = Liked.query.get(id)
+    print(newLike.tag_name)
+    print("/ TAG ID", body['like'][0]['tag_id'])
+    if newLike is None:
+        raise APIException('Tag ID not found', status_code=404)
+    if 'tag_id' in body['like'][0]:
+        newLike.tag_id = body['like'][0]['tag_id']
+    if 'tag_name' in body['like'][0]:
+        newLike.tag_name = body['like'][0]['tag_name']
+    db.session.commit()
+
+    newDislike = Disliked.query.get(id)
+    print(newDislike.tag_name)
+    print("/", body['dislike'][0]['tag_id'])
+    if newDislike is None:
+        raise APIException('TAG ID not found', status_code=404)
+    if 'tag_id' in body['dislike'][0]:
+        newDislike.tag_id = body['dislike'][0]['tag_id']
+    if 'tag_name' in body['dislike'][0]:
+        newDislike.tag_name = body['dislike'][0]['tag_name']
+    db.session.commit()
+
+
 
     user1 = User.query.filter_by(username=username).first()
 
