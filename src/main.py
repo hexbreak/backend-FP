@@ -3,9 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 import os
 from flask import Flask, request, jsonify, url_for
-from flask_jwt_simple import (
-    JWTManager, jwt_required, create_jwt, get_jwt_identity
-)
+from flask_jwt_simple import ( JWTManager, jwt_required, create_jwt, get_jwt_identity )
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
@@ -70,29 +68,6 @@ def login():
     ret = {'jwt': create_jwt(identity=username)}
     return jsonify(ret), 200
 
-# Login & Update / id
-@app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
-def obtain_user_id(user_id):
-
-    body = request.get_json()
-
-    if request.method == 'PUT':
-        user1 = User.query.get(user_id)
-        if user1 is None:
-            raise APIException('User ID not found', status_code=404)
-        if 'about' in body:
-            user1.about = body['about']
-        if 'image' in body:
-            user1.image = body['image']
-        db.session.commit()
-        return jsonify(user1.serialize()), 200
-
-    if request.method == 'GET':
-        user1 = User.query.get(user_id)
-        return jsonify(user1.serialize()), 200
-
-    return 'Should look good', 200
-
 # Get / username
 @app.route('/user/<username>', methods=['GET'])
 def obtain_username(username):
@@ -104,6 +79,58 @@ def obtain_username(username):
     response_body = list(map(lambda x: x.serialize(), get_user))
     
     return jsonify(response_body), 200
+
+# Get / username
+@app.route('/user/<int:user_id>', methods=['GET'])
+def id_username(user_id):
+
+    body = request.get_json()
+    get_user = User.query.get(user_id)
+    if get_user is None:
+        raise APIException('Username does not exist.', status_code=404)
+    response_body = get_user.serialize()
+    
+    return jsonify(response_body), 200
+
+@app.route('/user/<username>/<int:id>', methods=['PUT'])
+def put_editprofile(username, id):
+
+    body = request.get_json()
+
+    nplay = NowPlaying.query.get(id)
+    print(nplay.game_id)
+    print("/ GAME ID", body['playing'][0]['game_id'])
+    if nplay is None:
+        raise APIException('Game ID not found', status_code=404)
+    if 'game_id' in body['playing'][0]:
+        nplay.game_id = body['playing'][0]['game_id'] # all the paths to the properties should look something like this and also in the validations/if statements
+    if 'game_name' in body:
+        nplay.game_name = body['game_name']
+    if 'notes' in body:
+        nplay.notes = body['notes']
+    db.session.commit()
+
+    newHl = Highlights.query.get(id)
+    if newHl is None:
+        raise APIException('Game ID not found', status_code=404)
+    if 'game_id' in body:
+        newHl.game_id = body['game_id']
+    if 'game_name' in body:
+        newHl.game_name = body['game_name']
+    db.session.commit()
+
+    user1 = User.query.filter_by(username=username).first()
+
+    return jsonify(user1.serialize()), 200
+
+    # if request.method == 'GET':
+    #     newplay = NowPlaying.query.get(id)
+    #     playbody = newplay.serialize()
+    #     newhl = Highlights.query.get(id)
+    #     highbody = newhl.serialize()
+    #     response_body = (playbody, highbody)
+
+    #     return jsonify(response_body), 200
 
 # Add a game for playing
 @app.route('/user/<int:user_id>/nplay', methods=['POST'])
@@ -129,9 +156,45 @@ def add_playing(user_id):
 
     return jsonify(response_body), 200
 
+# Add a game for playing with username
+@app.route('/user/<username>/nplay', methods=['POST'])
+def adduser_playing(username):
+
+    body = request.get_json()
+
+    if body is None:
+        raise APIException("Body is empty, need: game_name & game_id.", status_code=404)
+    if 'game_name' not in body:
+        raise APIException("Missing game_name.", status_code=404)
+    if 'game_id' not in body:
+        raise APIException("Missing game_id", status_code=404)
+    if 'notes' not in body:
+        raise APIException("Missing notes, leave an empty string.", status_code=404)
+    
+    nowplaying1 = NowPlaying(username=username, game_name=body['game_name'], game_id=body['game_id'], notes=body['notes'])
+    db.session.add(nowplaying1)
+    db.session.commit()
+    response_body = nowplaying1.serialize()
+
+    print("/ print test for /", response_body)
+
+    return jsonify(response_body), 200
+
+
 # Get games on playing
 @app.route('/user/<int:user_id>/nplay', methods=['GET'])
 def get_playing(user_id):
+
+    body = request.get_json()
+    
+    get_play = NowPlaying.query.all()
+    response_body = list(map(lambda x: x.serialize(), get_play))
+
+    return jsonify(response_body), 200
+
+# Get games on playing with username
+@app.route('/user/<username>/nplay', methods=['GET'])
+def getuser_playing(username):
 
     body = request.get_json()
     

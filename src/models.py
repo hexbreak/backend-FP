@@ -76,7 +76,7 @@ class NowPlaying(db.Model):
     notes = db.Column(db.String(500), unique=False, nullable=True)
 
     def __repr__(self):
-        return '<NowPlaying %r>' % self.user_id
+        return '<NowPlaying %r>' % self.game_name
 
     def serialize(self):
         return {
