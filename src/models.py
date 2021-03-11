@@ -41,7 +41,7 @@ class Platform(db.Model):
     platform_id = db.Column(db.String(120), unique=False, nullable=True)
 
     def __repr__(self):
-        return '<Platform %r>' % self.user_id
+        return '<Platform %r>' % self.id
 
     def serialize(self):
         return {
@@ -58,7 +58,7 @@ class Highlights(db.Model):
     game_id = db.Column(db.String(120), unique=False, nullable=True)
 
     def __repr__(self):
-        return '<Highlights %r>' % self.user_id
+        return '<Highlights %r>' % self.id
 
     def serialize(self):
         return {
@@ -76,7 +76,7 @@ class NowPlaying(db.Model):
     notes = db.Column(db.String(500), unique=False, nullable=True)
 
     def __repr__(self):
-        return '<NowPlaying %r>' % self.game_name
+        return '<NowPlaying %r>' % self.id
 
     def serialize(self):
         return {
@@ -94,7 +94,7 @@ class FavoriteList(db.Model):
     game_id = db.Column(db.String(120), unique=True, nullable=True)
 
     def __repr__(self):
-        return '<FavoriteList %r>' % self.user_id
+        return '<FavoriteList %r>' % self.id
 
     def serialize(self):
         return {
@@ -111,7 +111,7 @@ class Liked(db.Model):
     tag_id = db.Column(db.String(25), unique=False, nullable=True)
 
     def __repr__(self):
-        return '<Liked %r>' % self.user_id
+        return '<Liked %r>' % self.id
 
     def serialize(self):
         return {
@@ -128,7 +128,7 @@ class Disliked(db.Model):
     tag_id = db.Column(db.String(25), unique=False, nullable=True)
 
     def __repr__(self):
-        return '<Disliked %r>' % self.user_id
+        return '<Disliked %r>' % self.id
 
     def serialize(self):
         return {

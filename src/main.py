@@ -97,9 +97,16 @@ def put_editprofile(username, id):
 
     body = request.get_json()
 
-    # putPlat = Platform.query.get(id)
-    # print(putPlat.platform_name)
-    # print("/ PLATFORM ID", body[])
+    putPlat = Platform.query.get(id)
+    print(putPlat.platform_name)
+    print("/ PLATFORM ID", body['platforms'][0]['platform_id'])
+    if putPlat is None:
+        raise APIException('Platform ID not found', status_code=404)
+    if 'platform_id' in body['platforms'][0]:
+        putPlat.platform_id = body['platforms'][0]['platform_id']
+    if 'platform_name' in body['platforms'][0]:
+        putPlat.platform_name = body['platforms'][0]['platform_name']
+    db.session.commit()
 
     nplay = NowPlaying.query.get(id)
     print(nplay.game_name)
