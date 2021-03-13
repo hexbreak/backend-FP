@@ -125,7 +125,6 @@ def post_editprofile(user_id):
 
     return jsonify(response_body)
 
-
 # PUT method for a specific id for all tables
 @app.route('/user/<username>/<int:id>', methods=['PUT'])
 def put_editprofile(username, id):
@@ -190,6 +189,26 @@ def put_editprofile(username, id):
     user1 = User.query.filter_by(username=username).first()
 
     return jsonify(user1.serialize()), 200
+
+# Delete from Edit Profile page
+@app.route('/user/<username>/<int:id>', methods=['DELETE'])
+def delete_editprofile(username, id):
+
+    removePL = Platform.query.get(id)
+    db.session.delete(removePL)
+    removeHL = Highlights.query.get(id)
+    db.session.delete(removeHL)
+    removeNP = NowPlaying.query.get(id)
+    db.session.delete(removeNP)
+    removeLK = Liked.query.get(id)
+    db.session.delete(removeLK)
+    removeDL = Disliked.query.get(id)
+    db.session.delete()
+    db.session.commit()
+
+    postprofile = User.query.filter_by(username=username).first()
+
+    return jsonify(postprofile.serialize())
 
 # Add a game for playing
 @app.route('/user/<int:user_id>/nplay', methods=['POST'])
