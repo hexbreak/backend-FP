@@ -92,14 +92,49 @@ def id_username(user_id):
     
     return jsonify(response_body), 200
 
+# POST method for new listing for all tables
+@app.route('/user/<int:user_id>', methods=['POST'])
+def post_editprofile(user_id):
+
+    body = request.get_json()
+
+    if body is None:
+        raise APIException("Body is empty", status_code=404)
+    addplatform = Platform(user_id=user_id, platform_name=body['platforms'][0]['platform_name'], platform_id=body['platforms'][0]['platform_id'])
+    db.session.add(addplatform)
+    db.session.commit()
+
+    addplaying = NowPlaying(user_id=user_id, game_name=body['playing'][0]['game_name'], game_id=body['playing'][0]['game_id'], notes=body['playing'][0]['notes'])
+    db.session.add(addplaying)
+    db.session.commit()
+
+    addhighlight = Highlights(user_id=user_id, game_name=body['highlight'][0]['game_name'], game_id=body['highlight'][0]['game_id'])
+    db.session.add(addhighlight)
+    db.session.commit()
+
+    addlike = Liked(user_id=user_id, tag_name=body['like'][0]['tag_name'], tag_id=body['like'][0]['tag_id'])
+    db.session.add(addlike)
+    db.session.commit()
+
+    addislike = Disliked(user_id=user_id, tag_name=body['dislike'][0]['tag_name'], tag_id=body['dislike'][0]['tag_id'])
+    db.session.add(addislike)
+    db.session.commit()
+
+    obtainUser = User.query.get(user_id)
+    response_body = obtainUser.serialize()
+
+    return jsonify(response_body)
+
+
+# PUT method for a specific id for all tables
 @app.route('/user/<username>/<int:id>', methods=['PUT'])
 def put_editprofile(username, id):
 
     body = request.get_json()
 
     putPlat = Platform.query.get(id)
-    print(putPlat.platform_name)
-    print("/ PLATFORM ID", body['platforms'][0]['platform_id'])
+    # print(putPlat.platform_name)
+    # print("/ PLATFORM ID", body['platforms'][0]['platform_id'])
     if putPlat is None:
         raise APIException('Platform ID not found', status_code=404)
     if 'platform_id' in body['platforms'][0]:
@@ -109,8 +144,8 @@ def put_editprofile(username, id):
     db.session.commit()
 
     nplay = NowPlaying.query.get(id)
-    print(nplay.game_name)
-    print("/ GAME ID", body['playing'][0]['game_id'])
+    # print(nplay.game_name)
+    # print("/ GAME ID", body['playing'][0]['game_id'])
     if nplay is None:
         raise APIException('Game ID not found', status_code=404)
     if 'game_id' in body['playing'][0]:
@@ -131,8 +166,8 @@ def put_editprofile(username, id):
     db.session.commit()
 
     newLike = Liked.query.get(id)
-    print(newLike.tag_name)
-    print("/ TAG ID", body['like'][0]['tag_id'])
+    # print(newLike.tag_name)
+    # print("/ TAG ID", body['like'][0]['tag_id'])
     if newLike is None:
         raise APIException('Tag ID not found', status_code=404)
     if 'tag_id' in body['like'][0]:
@@ -142,8 +177,8 @@ def put_editprofile(username, id):
     db.session.commit()
 
     newDislike = Disliked.query.get(id)
-    print(newDislike.tag_name)
-    print("/", body['dislike'][0]['tag_id'])
+    # print(newDislike.tag_name)
+    # print("/", body['dislike'][0]['tag_id'])
     if newDislike is None:
         raise APIException('TAG ID not found', status_code=404)
     if 'tag_id' in body['dislike'][0]:
@@ -152,20 +187,9 @@ def put_editprofile(username, id):
         newDislike.tag_name = body['dislike'][0]['tag_name']
     db.session.commit()
 
-
-
     user1 = User.query.filter_by(username=username).first()
 
     return jsonify(user1.serialize()), 200
-
-    # if request.method == 'GET':
-    #     newplay = NowPlaying.query.get(id)
-    #     playbody = newplay.serialize()
-    #     newhl = Highlights.query.get(id)
-    #     highbody = newhl.serialize()
-    #     response_body = (playbody, highbody)
-
-    #     return jsonify(response_body), 200
 
 # Add a game for playing
 @app.route('/user/<int:user_id>/nplay', methods=['POST'])

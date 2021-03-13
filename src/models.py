@@ -55,7 +55,7 @@ class Highlights(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     game_name = db.Column(db.String(250), unique=False, nullable=True)
-    game_id = db.Column(db.String(120), unique=False, nullable=True)
+    game_id = db.Column(db.String(120), unique=True, nullable=True)
 
     def __repr__(self):
         return '<Highlights %r>' % self.id
@@ -72,7 +72,7 @@ class NowPlaying(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     game_name = db.Column(db.String(250), unique=False, nullable=True)
-    game_id = db.Column(db.String(120), unique=False, nullable=True)
+    game_id = db.Column(db.String(120), unique=True, nullable=True)
     notes = db.Column(db.String(500), unique=False, nullable=True)
 
     def __repr__(self):
@@ -108,7 +108,7 @@ class Liked(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     tag_name = db.Column(db.String(50), unique=False, nullable=True)
-    tag_id = db.Column(db.String(25), unique=False, nullable=True)
+    tag_id = db.Column(db.String(25), unique=True, nullable=True)
 
     def __repr__(self):
         return '<Liked %r>' % self.id
@@ -125,7 +125,7 @@ class Disliked(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     tag_name = db.Column(db.String(50), unique=False, nullable=True)
-    tag_id = db.Column(db.String(25), unique=False, nullable=True)
+    tag_id = db.Column(db.String(25), unique=True, nullable=True)
 
     def __repr__(self):
         return '<Disliked %r>' % self.id
