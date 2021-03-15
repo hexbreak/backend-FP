@@ -53,7 +53,7 @@ def login():
         return jsonify({"msg": "Missing JSON in request"}), 400
 
     params = request.get_json()
-    username = params.get('username', None)
+    email = params.get('email', None)
     password = params.get('password', None)
 
     if not username:
@@ -70,7 +70,7 @@ def login():
     ret = {
         'jwt': create_jwt(identity=email),
         'user_id': login_user.id}
-        
+
     return jsonify(ret), 200
 
 # Get / username
