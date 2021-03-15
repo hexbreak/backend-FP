@@ -61,11 +61,16 @@ def login():
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
-    if username != 'test' or password != 'test':
+    login_user = User.query.filter_by(email=email).first()
+
+    if username != login_user.email or password != login_user.password:
         return jsonify({"msg": "Bad username or password"}), 401
 
     # Identity can be any data that is json serializable
-    ret = {'jwt': create_jwt(identity=username)}
+    ret = {
+        'jwt': create_jwt(identity=email),
+        'user_id': login_user.id}
+        
     return jsonify(ret), 200
 
 # Get / username
