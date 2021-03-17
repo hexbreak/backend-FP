@@ -11,7 +11,7 @@ class User(db.Model):
     image = db.Column(db.String(500), unique=False, nullable=True)
     favorite = db.relationship('FavoriteList', backref='user', lazy=True)
     platforms = db.relationship('Platform', backref='user', lazy=True)
-    highlight = db.relationship('Highlights', backref='user', lazy=True)
+    game_progression = db.relationship('Highlights', backref='user', lazy=True)
     playing = db.relationship('NowPlaying', backref='user', lazy=True)
     like = db.relationship('Liked', backref='user', lazy=True)
     dislike = db.relationship('Disliked', backref='user', lazy=True)
@@ -28,7 +28,7 @@ class User(db.Model):
             "image": self.image,
             "favorite": list(map(lambda x: x.serialize(), self.favorite)),
             "platforms": list(map(lambda x: x.serialize(), self.platforms)),
-            "highlight": list(map(lambda x: x.serialize(), self.highlight)),
+            "game_progression": list(map(lambda x: x.serialize(), self.game_progression)),
             "playing": list(map(lambda x: x.serialize(), self.playing)),
             "like": list(map(lambda x: x.serialize(), self.like)),
             "dislike": list(map(lambda x: x.serialize(), self.dislike))
@@ -54,8 +54,12 @@ class Platform(db.Model):
 class Highlights(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    game_name = db.Column(db.String(250), unique=False, nullable=True)
-    game_id = db.Column(db.String(120), unique=False, nullable=True)
+    started_name = db.Column(db.String(120), unique=False, nullable=True)
+    started_id = db.Column(db.String(120), unique=False, nullable=True)
+    finished_name = db.Column(db.String(120), unique=False, nullable=True)
+    finished_id = db.Column(db.String(120), unique=False, nullable=True)
+    completed_name = db.Column(db.String(120), unique=False, nullable=True)
+    completed_id = db.Column(db.String(120), unique=False, nullable=True)
 
     def __repr__(self):
         return '<Highlights %r>' % self.id
@@ -64,8 +68,12 @@ class Highlights(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "game_name": self.game_name,
-            "game_id": self.game_id
+            "started_name": self.started_name,
+            "started_id": self.started_id,
+            "finished_name": self.finished_name,
+            "finished_id": self.finished_id,
+            "completed_name": self.completed_name,
+            "completed_id": self.completed_id
         }
 
 class NowPlaying(db.Model):

@@ -105,45 +105,38 @@ def post_editprofile(user_id):
     print("// body", body)
     if body is None:
         raise APIException("Body is empty", status_code=404)
-    addplatform1 = Platform(user_id=user_id, platform_name=body['platforms'][0]['platform_name'], platform_id=body['platforms'][0]['platform_id'])
-    addplatform2 = Platform(user_id=user_id, platform_name=body['platforms'][1]['platform_name'], platform_id=body['platforms'][1]['platform_id'])
-    addplatform3 = Platform(user_id=user_id, platform_name=body['platforms'][2]['platform_name'], platform_id=body['platforms'][2]['platform_id'])
-    db.session.add(addplatform1)
-    db.session.add(addplatform2)
-    db.session.add(addplatform3)
+    for i in range(3):
+        addplatform = Platform(user_id=user_id, platform_name=body['platforms'][i]['platform_name'], platform_id=body['platforms'][i]['platform_id'])
+        db.session.add(addplatform)
     db.session.commit()
 
-    addplaying1 = NowPlaying(user_id=user_id, game_name=body['playing'][0]['game_name'], game_id=body['playing'][0]['game_id'], notes=body['playing'][0]['notes'])
-    addplaying2 = NowPlaying(user_id=user_id, game_name=body['playing'][1]['game_name'], game_id=body['playing'][1]['game_id'], notes=body['playing'][1]['notes'])
-    addplaying3 = NowPlaying(user_id=user_id, game_name=body['playing'][2]['game_name'], game_id=body['playing'][2]['game_id'], notes=body['playing'][2]['notes'])
-    db.session.add(addplaying1)
-    db.session.add(addplaying2)
-    db.session.add(addplaying3)
+    for i in range(3):
+        addplaying = NowPlaying(user_id=user_id, game_name=body['playing'][i]['game_name'], game_id=body['playing'][i]['game_id'], notes=body['playing'][i]['notes'])
+        db.session.add(addplaying)
     db.session.commit()
 
-    addhighlight1 = Highlights(user_id=user_id, game_name=body['highlight'][0]['game_name'], game_id=body['highlight'][0]['game_id'])
-    addhighlight2 = Highlights(user_id=user_id, game_name=body['highlight'][1]['game_name'], game_id=body['highlight'][1]['game_id'])
-    addhighlight3 = Highlights(user_id=user_id, game_name=body['highlight'][2]['game_name'], game_id=body['highlight'][2]['game_id'])
-    db.session.add(addhighlight1)
-    db.session.add(addhighlight2)
-    db.session.add(addhighlight3)
+    for i in range(3):
+        addgameprogression = Highlights(user_id=user_id, 
+        started_name=body['game_progression'][i]['started_name'], started_id=body['game_progression'][i]['started_id'], finished_name=body['game_progression'][i]['finished_name'], finished_id=body['game_progression'][i]['finished_id'], completed_name=body['game_progression'][i]['completed_name'], completed_id=body['game_progression'][i]['completed_id'])
+        db.session.add(addgameprogression)
     db.session.commit()
 
     addlike1 = Liked(user_id=user_id, tag_name=body['like'][0]['tag_name'], tag_id=body['like'][0]['tag_id'])
-    addlike2 = Liked(user_id=user_id, tag_name=body['like'][1]['tag_name'], tag_id=body['like'][1]['tag_id'])
-    addlike3 = Liked(user_id=user_id, tag_name=body['like'][2]['tag_name'], tag_id=body['like'][2]['tag_id'])
     db.session.add(addlike1)
-    db.session.add(addlike2)
-    db.session.add(addlike3)
     db.session.commit()
 
     addislike1 = Disliked(user_id=user_id, tag_name=body['dislike'][0]['tag_name'], tag_id=body['dislike'][0]['tag_id'])
-    addislike2 = Disliked(user_id=user_id, tag_name=body['dislike'][1]['tag_name'], tag_id=body['dislike'][1]['tag_id'])
-    addislike3 = Disliked(user_id=user_id, tag_name=body['dislike'][2]['tag_name'], tag_id=body['dislike'][2]['tag_id'])
     db.session.add(addislike1)
-    db.session.add(addislike2)
-    db.session.add(addislike3)
     db.session.commit()
+
+            # Back up Duplicate code if loop ever stops working
+        # addplatform1 = Platform(user_id=user_id, platform_name=body['platforms'][0]['platform_name'], platform_id=body['platforms'][0]['platform_id'])
+        # addplatform2 = Platform(user_id=user_id, platform_name=body['platforms'][1]['platform_name'], platform_id=body['platforms'][1]['platform_id'])
+        # addplatform3 = Platform(user_id=user_id, platform_name=body['platforms'][2]['platform_name'], platform_id=body['platforms'][2]['platform_id'])
+        # db.session.add(addplatform1)
+        # db.session.add(addplatform2)
+        # db.session.add(addplatform3)
+        # db.session.commit()
 
     obtainUser = User.query.get(user_id)
     response_body = obtainUser.serialize()
