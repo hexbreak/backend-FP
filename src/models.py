@@ -13,8 +13,8 @@ class User(db.Model):
     platforms = db.relationship('Platform', backref='user', lazy=True)
     game_progression = db.relationship('Highlights', backref='user', lazy=True)
     playing = db.relationship('NowPlaying', backref='user', lazy=True)
-    like = db.relationship('Liked', backref='user', lazy=True)
-    dislike = db.relationship('Disliked', backref='user', lazy=True)
+    liked = db.relationship('TagLike', backref='user', lazy=True)
+    disliked = db.relationship('TagDislike', backref='user', lazy=True)
 
     def __repr__(self):
         return '<User %r>' % self.id
@@ -30,8 +30,8 @@ class User(db.Model):
             "platforms": list(map(lambda x: x.serialize(), self.platforms)),
             "game_progression": list(map(lambda x: x.serialize(), self.game_progression)),
             "playing": list(map(lambda x: x.serialize(), self.playing)),
-            "like": list(map(lambda x: x.serialize(), self.like)),
-            "dislike": list(map(lambda x: x.serialize(), self.dislike))
+            "liked": list(map(lambda x: x.serialize(), self.liked)),
+            "disliked": list(map(lambda x: x.serialize(), self.disliked))
         }
 
 class Platform(db.Model):
@@ -54,12 +54,8 @@ class Platform(db.Model):
 class Highlights(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    started_name = db.Column(db.String(120), unique=False, nullable=True)
-    started_id = db.Column(db.String(120), unique=False, nullable=True)
-    finished_name = db.Column(db.String(120), unique=False, nullable=True)
-    finished_id = db.Column(db.String(120), unique=False, nullable=True)
-    completed_name = db.Column(db.String(120), unique=False, nullable=True)
-    completed_id = db.Column(db.String(120), unique=False, nullable=True)
+    game_name = db.Column(db.String(120), unique=False, nullable=True)
+    game_id = db.Column(db.String(120), unique=False, nullable=True)
 
     def __repr__(self):
         return '<Highlights %r>' % self.id
@@ -68,12 +64,8 @@ class Highlights(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "started_name": self.started_name,
-            "started_id": self.started_id,
-            "finished_name": self.finished_name,
-            "finished_id": self.finished_id,
-            "completed_name": self.completed_name,
-            "completed_id": self.completed_id
+            "game_name": self.game_name,
+            "game_id": self.game_id,
         }
 
 class NowPlaying(db.Model):
@@ -112,36 +104,32 @@ class FavoriteList(db.Model):
             "game_id": self.game_id,
         }
 
-class Liked(db.Model):
+class TagLike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    tag_name = db.Column(db.String(50), unique=False, nullable=True)
-    tag_id = db.Column(db.String(25), unique=False, nullable=True)
+    name = db.Column(db.String(50), unique=False, nullable=True)
 
     def __repr__(self):
-        return '<Liked %r>' % self.id
+        return '<TagLike %r>' % self.id
 
     def serialize(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "tag_name": self.tag_name,
-            "tag_id": self.tag_id
+            "name": self.name,
         }
 
-class Disliked(db.Model):
+class TagDislike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    tag_name = db.Column(db.String(50), unique=False, nullable=True)
-    tag_id = db.Column(db.String(25), unique=False, nullable=True)
+    name = db.Column(db.String(50), unique=False, nullable=True)
 
     def __repr__(self):
-        return '<Disliked %r>' % self.id
+        return '<TagDislike %r>' % self.id
 
     def serialize(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "tag_name": self.tag_name,
-            "tag_id": self.tag_id
+            "name": self.name,
         }  

@@ -3,20 +3,23 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 import os
 from flask import Flask, request, jsonify, url_for
-from flask_jwt_simple import ( JWTManager, jwt_required, create_jwt, get_jwt_identity )
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Platform, Highlights, NowPlaying, FavoriteList, Liked, Disliked
+from models import db, User, Platform, Highlights, NowPlaying, FavoriteList, TagLike, TagDislike
 #from models import Person
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'rolando-franky'
+app.config["JWT_SECRET_KEY"] = "game-finder"  # Change this!
 jwt = JWTManager(app)
 MIGRATE = Migrate(app, db)
 db.init_app(app)
@@ -33,6 +36,27 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+# Create a route to authenticate your users and return JWTs. The
+# create_access_token() function is used to actually generate the JWT.
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+    if username != "test" or password != "test":
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token)
+
+# Protect a route with jwt_required, which will kick out requests
+# without a valid JWT present.
+@app.route("/protected", methods=["GET"])
+@jwt_required()
+def protected():
+    # Access the identity of the current user with get_jwt_identity
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
+
 # This get method grabs EVERYTHING we have collected from the Users.
 @app.route('/users', methods=['GET'])
 def get_all_users():
@@ -44,34 +68,6 @@ def get_all_users():
         raise APIException('You should not be seeing this. Check the route for errors.', status_code=400)
 
     return jsonify(response_body), 200
-
-# Provide a method to create access tokens. The create_jwt()
-# function is used to actually generate the token
-@app.route('/login', methods=['POST'])
-def login():
-    if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
-
-    params = request.get_json()
-    email = params.get('email', None)
-    password = params.get('password', None)
-
-    if not username:
-        return jsonify({"msg": "Missing username parameter"}), 400
-    if not password:
-        return jsonify({"msg": "Missing password parameter"}), 400
-
-    login_user = User.query.filter_by(email=email).first()
-
-    if username != login_user.email or password != login_user.password:
-        return jsonify({"msg": "Bad username or password"}), 401
-
-    # Identity can be any data that is json serializable
-    ret = {
-        'jwt': create_jwt(identity=email),
-        'user_id': login_user.id}
-
-    return jsonify(ret), 200
 
 # Get / username
 @app.route('/user/<username>', methods=['GET'])
@@ -115,18 +111,20 @@ def post_editprofile(user_id):
         db.session.add(addplaying)
     db.session.commit()
 
-    for i in range(3):
+    for i in range(9):
         addgameprogression = Highlights(user_id=user_id, 
-        started_name=body['game_progression'][i]['started_name'], started_id=body['game_progression'][i]['started_id'], finished_name=body['game_progression'][i]['finished_name'], finished_id=body['game_progression'][i]['finished_id'], completed_name=body['game_progression'][i]['completed_name'], completed_id=body['game_progression'][i]['completed_id'])
+        game_name=body['game_progression'][i]['game_name'], game_id=body['game_progression'][i]['game_id'])
         db.session.add(addgameprogression)
     db.session.commit()
 
-    addlike1 = Liked(user_id=user_id, tag_name=body['like'][0]['tag_name'], tag_id=body['like'][0]['tag_id'])
-    db.session.add(addlike1)
+    for i in rage(40):
+        addlike = TagLike(user_id=user_id, name=body['liked'][i]['name'])
+        db.session.add(addlike)
     db.session.commit()
 
-    addislike1 = Disliked(user_id=user_id, tag_name=body['dislike'][0]['tag_name'], tag_id=body['dislike'][0]['tag_id'])
-    db.session.add(addislike1)
+    for in range(40):
+        addislike = TagDislike(user_id=user_id, name=body['disliked'][i]['name'])
+        db.session.add(addislike)
     db.session.commit()
 
             # Back up Duplicate code if loop ever stops working
@@ -663,14 +661,6 @@ def deltags_dislike(user_id, disliked_id):
     print("/ print test for /", response_body)
 
     return jsonify(response_body), 200
-
-# Protect a view with jwt_required, which requires a valid jwt
-# to be present in the headers.
-@app.route('/protected', methods=['GET'])
-@jwt_required
-def protected():
-    # Access the identity of the current user with get_jwt_identity
-    return jsonify({'hello_from': get_jwt_identity()}), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
