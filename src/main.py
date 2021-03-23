@@ -36,16 +36,45 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+@app.route("/register", methods=["POST"])
+def register():
+    email = request.json.get('email', None)
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    if not email:
+        return "Missing email", 400
+    if not username:
+        return "Missing username", 400
+    if not password:
+        return "Missing password", 400
+
+    newUser = User(email=email, username=username, password=password)
+    db.session.add(newUser)
+    db.session.commit()
+
+    return jsonify(newUser.serialize()), 200
+
 # Create a route to authenticate your users and return JWTs. The
 # create_access_token() function is used to actually generate the JWT.
 @app.route("/login", methods=["POST"])
 def login():
-    username = request.json.get("username", None)
-    password = request.json.get("password", None)
-    if username != "test" or password != "test":
-        return jsonify({"msg": "Bad username or password"}), 401
 
-    access_token = create_access_token(identity=username)
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+    # if email != "test" or password != "test":
+    #     return jsonify({"msg": "Bad email or password"}), 401
+
+    if not email:
+        return 'Missing email', 400
+    if not password:
+        return 'Missing password', 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return 'User not found.', 400
+
+    access_token = create_access_token(identity=email)
     return jsonify(access_token=access_token)
 
 # Protect a route with jwt_required, which will kick out requests
@@ -117,30 +146,26 @@ def post_editprofile(user_id):
         db.session.add(addgameprogression)
     db.session.commit()
 
-    for i in rage(40):
+    for i in range(3):
         addlike = TagLike(user_id=user_id, name=body['liked'][i]['name'])
         db.session.add(addlike)
     db.session.commit()
 
-    for in range(40):
+    for i in range(3):
         addislike = TagDislike(user_id=user_id, name=body['disliked'][i]['name'])
         db.session.add(addislike)
     db.session.commit()
 
             # Back up Duplicate code if loop ever stops working
         # addplatform1 = Platform(user_id=user_id, platform_name=body['platforms'][0]['platform_name'], platform_id=body['platforms'][0]['platform_id'])
-        # addplatform2 = Platform(user_id=user_id, platform_name=body['platforms'][1]['platform_name'], platform_id=body['platforms'][1]['platform_id'])
-        # addplatform3 = Platform(user_id=user_id, platform_name=body['platforms'][2]['platform_name'], platform_id=body['platforms'][2]['platform_id'])
         # db.session.add(addplatform1)
-        # db.session.add(addplatform2)
-        # db.session.add(addplatform3)
         # db.session.commit()
 
     obtainUser = User.query.get(user_id)
     response_body = obtainUser.serialize()
 
     return jsonify(response_body)
-
+    
 # PUT method for a specific id for all tables
 @app.route('/user/<username>/<int:id>', methods=['PUT'])
 def put_editprofile(username, id):
