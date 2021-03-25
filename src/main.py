@@ -13,6 +13,7 @@ from flask_jwt_extended import JWTManager
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Platform, Highlights, NowPlaying, FavoriteList, TagLike, TagDislike
+import datetime
 #from models import Person
 
 app = Flask(__name__)
@@ -60,22 +61,18 @@ def register():
 @app.route("/login", methods=["POST"])
 def login():
 
-    email = request.json.get("email", None)
-    password = request.json.get("password", None)
-    # if email != "test" or password != "test":
-    #     return jsonify({"msg": "Bad email or password"}), 401
+    credentials = request.json
+    username = credentials.get("username", None)
+    password = credentials.get("password", None)
+    user = User.query.filter_by(username=username, password=password).first()
+    if user is None:
+        return jsonify("Invalid email or password."), 400
 
-    if not email:
-        return 'Missing email', 400
-    if not password:
-        return 'Missing password', 400
+    expires = datetime.timedelta(days=7)
+    access_token = create_access_token(identity=username, expires_delta=expires)
+    response = { "user_id": user.id, "token": access_token }
 
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return 'User not found.', 400
-
-    access_token = create_access_token(identity=email)
-    return jsonify(access_token=access_token)
+    return jsonify(response)
 
 # Protect a route with jwt_required, which will kick out requests
 # without a valid JWT present.
@@ -84,6 +81,7 @@ def login():
 def protected():
     # Access the identity of the current user with get_jwt_identity
     current_user = get_jwt_identity()
+    print(current_user)
     return jsonify(logged_in_as=current_user), 200
 
 # This get method grabs EVERYTHING we have collected from the Users.
@@ -365,13 +363,15 @@ def addget_fav(user_id):
     
     if request.method == 'POST':
         if body is None:
-            raise APIException("Body is empty, need: game_name & game_id.", status_code=400)
+            raise APIException("Body is empty, need: game_name, game_image & game_id.", status_code=400)
         if 'game_name' not in body:
             raise APIException("Missing game_name.", status_code=400)
         if 'game_id' not in body:
             raise APIException("Missing game_id.", status_code=400)
+        if 'game_image' not in body:
+            raise APIException("Missing background_image", status_code=404)
         
-        favoritelist1 = FavoriteList(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'])
+        favoritelist1 = FavoriteList(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'], game_image=body['game_image'])
         db.session.add(favoritelist1)
         db.session.commit()
         response_body = favoritelist1.serialize()
@@ -383,13 +383,13 @@ def addget_fav(user_id):
     if request.method == 'GET':
         get_fav = db.session.query(FavoriteList).filter(FavoriteList.user_id == user_id)
         response_body = list(map(lambda x: x.serialize(), get_fav))
-        fav_list = []
+        # fav_list = []
 
-        for x in response_body:
-            if x['game_name'] != "":
-                fav_list.append(x['game_name'])
+        # for x in response_body:
+        #     if x['game_name'] != "":
+        #         fav_list.append(x['game_name']) # prints an array list of game names only.
 
-        return jsonify(fav_list), 200
+        return jsonify(response_body), 200
     
     return "Ok!", 200
 
@@ -407,6 +407,8 @@ def putdel_fav(user_id, favoritelist_id):
             put_fav.game_name = body['game_name']
         if 'game_id' in body:
             put_fav.game_id = body['game_id']
+        if 'game_image' in body:
+            put_fav.game_image = body['game_image']
         db.session.commit()
         response_body = put_fav.serialize()
 
@@ -429,6 +431,23 @@ def putdel_fav(user_id, favoritelist_id):
         return jsonify(response_body), 200
     
     return "Ok!", 200
+
+@app.route('/user/<int:user_id>/delfav/<int:favoritelist_id>', methods=['DELETE'])
+def delete_favorite(user_id, favoritelist_id):
+
+    remove_favorite = FavoriteList.query.get(favoritelist_id)
+    if remove_favorite is None:
+        raise APIException ('Game not found in Favorite List', status_code=404)
+    db.session.delete(remove_favorite)
+    db.session.commit()
+
+    new_list = FavoriteList.query.all()
+    response_body = list(map(lambda x: x.serialize(), new_list))
+    
+    print("/ print test for /", response_body)
+
+    return jsonify(response_body), 200
+
 
 # Add / Get Platforms
 @app.route('/user/<int:user_id>/plat', methods=['POST', 'GET'])

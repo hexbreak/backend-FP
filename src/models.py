@@ -92,6 +92,7 @@ class FavoriteList(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     game_name = db.Column(db.String(250), unique=False, nullable=True)
     game_id = db.Column(db.String(120), unique=False, nullable=True)
+    game_image = db.Column(db.String(120), unique=False, nullable=True)
 
     def __repr__(self):
         return '<FavoriteList %r>' % self.id
@@ -102,6 +103,7 @@ class FavoriteList(db.Model):
             "user_id": self.user_id,
             "game_name": self.game_name,
             "game_id": self.game_id,
+            "game_image": self.game_image
         }
 
 class TagLike(db.Model):
