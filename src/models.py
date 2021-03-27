@@ -9,7 +9,7 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     about = db.Column(db.String(1000), unique=False, nullable=True)
     image = db.Column(db.String(500), unique=False, nullable=True)
-    favorite = db.relationship('FavoriteList', backref='user', lazy=True)
+    favorites = db.relationship('FavoriteList', backref='user', lazy=True)
     platforms = db.relationship('Platform', backref='user', lazy=True)
     game_progression = db.relationship('Highlights', backref='user', lazy=True)
     playing = db.relationship('NowPlaying', backref='user', lazy=True)
@@ -26,7 +26,7 @@ class User(db.Model):
             "username": self.username,
             "about": self.about,
             "image": self.image,
-            "favorite": list(map(lambda x: x.serialize(), self.favorite)),
+            "favorites": list(map(lambda x: x.serialize(), self.favorites)),
             "platforms": list(map(lambda x: x.serialize(), self.platforms)),
             "game_progression": list(map(lambda x: x.serialize(), self.game_progression)),
             "playing": list(map(lambda x: x.serialize(), self.playing)),
@@ -74,6 +74,7 @@ class NowPlaying(db.Model):
     game_name = db.Column(db.String(250), unique=False, nullable=True)
     game_id = db.Column(db.String(120), unique=False, nullable=True)
     notes = db.Column(db.String(500), unique=False, nullable=True)
+    game_image = db.Column(db.String(200), unique=False, nullable=True)
 
     def __repr__(self):
         return '<NowPlaying %r>' % self.id
@@ -84,7 +85,8 @@ class NowPlaying(db.Model):
             "user_id": self.user_id,
             "game_name": self.game_name,
             "game_id": self.game_id,
-            "notes": self.notes
+            "notes": self.notes,
+            "game_image": self.game_image
         }
 
 class FavoriteList(db.Model):
@@ -110,6 +112,7 @@ class TagLike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(50), unique=False, nullable=True)
+    tag_id = db.Column(db.String(50), unique=False, nullable=True)
 
     def __repr__(self):
         return '<TagLike %r>' % self.id
@@ -119,12 +122,14 @@ class TagLike(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "name": self.name,
+            "tag_id": self.tag_id
         }
 
 class TagDislike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(50), unique=False, nullable=True)
+    tag_id = db.Column(db.String(50), unique=False, nullable=True)
 
     def __repr__(self):
         return '<TagDislike %r>' % self.id
@@ -134,4 +139,6 @@ class TagDislike(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "name": self.name,
+            "tag_id": self.tag_id
+            
         }  

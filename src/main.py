@@ -121,7 +121,7 @@ def id_username(user_id):
     return jsonify(response_body), 200
 
 # POST method for new listing for all tables
-@app.route('/user/<int:user_id>', methods=['POST'])
+@app.route('/user/<int:user_id>', methods=['PUT'])
 def post_editprofile(user_id):
 
     body = request.get_json()
@@ -134,7 +134,7 @@ def post_editprofile(user_id):
     db.session.commit()
 
     for i in range(3):
-        addplaying = NowPlaying(user_id=user_id, game_name=body['playing'][i]['game_name'], game_id=body['playing'][i]['game_id'], notes=body['playing'][i]['notes'])
+        addplaying = NowPlaying(user_id=user_id, game_name=body['playing'][i]['game_name'], game_id=body['playing'][i]['game_id'], notes=body['playing'][i]['notes'], game_image=body['playing'][i]['game_image'])
         db.session.add(addplaying)
     db.session.commit()
 
@@ -145,14 +145,22 @@ def post_editprofile(user_id):
     db.session.commit()
 
     for i in range(3):
-        addlike = TagLike(user_id=user_id, name=body['liked'][i]['name'])
+        addlike = TagLike(user_id=user_id, name=body['liked'][i]['name'], tag_id=body['liked'][i]['tag_id'])
         db.session.add(addlike)
     db.session.commit()
 
+    # addlike = TagLike(user_id=user_id, name=body['name'])
+    # db.session.add(addlike)
+    # db.session.commit()
+
     for i in range(3):
-        addislike = TagDislike(user_id=user_id, name=body['disliked'][i]['name'])
+        addislike = TagDislike(user_id=user_id, name=body['disliked'][i]['name'], tag_id=body['disliked'][i]['tag_id'])
         db.session.add(addislike)
     db.session.commit()
+
+    # addislike = TagDislike(user_id=user_id, name=body['name'])
+    # db.session.add(addislike)
+    # db.session.commit()
 
             # Back up Duplicate code if loop ever stops working
         # addplatform1 = Platform(user_id=user_id, platform_name=body['platforms'][0]['platform_name'], platform_id=body['platforms'][0]['platform_id'])
@@ -163,6 +171,10 @@ def post_editprofile(user_id):
     response_body = obtainUser.serialize()
 
     return jsonify(response_body)
+
+# Change Avatar Image
+@app.route('/user/<int:id>/image')
+
     
 # PUT method for a specific id for all tables
 @app.route('/user/<username>/<int:id>', methods=['PUT'])
@@ -370,7 +382,7 @@ def addget_fav(user_id):
             raise APIException("Missing game_id.", status_code=400)
         if 'game_image' not in body:
             raise APIException("Missing background_image", status_code=404)
-        
+
         favoritelist1 = FavoriteList(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'], game_image=body['game_image'])
         db.session.add(favoritelist1)
         db.session.commit()
