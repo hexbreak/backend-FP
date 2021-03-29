@@ -120,7 +120,7 @@ def id_username(user_id):
     
     return jsonify(response_body), 200
 
-# POST method for new listing for all tables
+# PUT method for new listing for all tables
 @app.route('/user/<int:user_id>', methods=['PUT'])
 def post_editprofile(user_id):
 
@@ -149,32 +149,20 @@ def post_editprofile(user_id):
         db.session.add(addlike)
     db.session.commit()
 
-    # addlike = TagLike(user_id=user_id, name=body['name'])
-    # db.session.add(addlike)
-    # db.session.commit()
-
     for i in range(3):
         addislike = TagDislike(user_id=user_id, name=body['disliked'][i]['name'], tag_id=body['disliked'][i]['tag_id'])
         db.session.add(addislike)
     db.session.commit()
-
-    # addislike = TagDislike(user_id=user_id, name=body['name'])
-    # db.session.add(addislike)
-    # db.session.commit()
-
-            # Back up Duplicate code if loop ever stops working
-        # addplatform1 = Platform(user_id=user_id, platform_name=body['platforms'][0]['platform_name'], platform_id=body['platforms'][0]['platform_id'])
-        # db.session.add(addplatform1)
-        # db.session.commit()
 
     obtainUser = User.query.get(user_id)
     response_body = obtainUser.serialize()
 
     return jsonify(response_body)
 
-# Change Avatar Image
-@app.route('/user/<int:id>/image')
-
+    # Back up Duplicate code if loop ever stops working
+    # addplatform1 = Platform(user_id=user_id, platform_name=body['platforms'][0]['platform_name'], platform_id=body['platforms'][0]['platform_id'])
+    # db.session.add(addplatform1)
+    # db.session.commit()
     
 # PUT method for a specific id for all tables
 @app.route('/user/<username>/<int:id>', methods=['PUT'])
