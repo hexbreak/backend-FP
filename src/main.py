@@ -128,10 +128,17 @@ def post_editprofile(user_id):
     print("// body", body)
     if body is None:
         raise APIException("Body is empty", status_code=404)
+
     for i in range(3):
         addplatform = Platform(user_id=user_id, platform_name=body['platforms'][i]['platform_name'], platform_id=body['platforms'][i]['platform_id'])
         db.session.add(addplatform)
     db.session.commit()
+
+    getplaylist = NowPlaying.query.all()
+    playlistser = list(map(lambda x: x.serialize(), getplaylist))
+    for x in playlistser:
+        if x['ID'] != "":
+            playlistser.clear(x)
 
     for i in range(3):
         addplaying = NowPlaying(user_id=user_id, game_name=body['playing'][i]['game_name'], game_id=body['playing'][i]['game_id'], notes=body['playing'][i]['notes'], game_image=body['playing'][i]['game_image'])
