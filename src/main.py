@@ -134,11 +134,11 @@ def post_editprofile(user_id):
         db.session.add(addplatform)
     db.session.commit()
 
-    getplaylist = NowPlaying.query.all()
-    playlistser = list(map(lambda x: x.serialize(), getplaylist))
-    for x in playlistser:
-        if x['ID'] != "":
-            playlistser.clear(x)
+    # getplaylist = NowPlaying.query.all()
+    # playlistser = list(map(lambda x: x.serialize(), getplaylist))
+    # for x in playlistser:
+    #     if x['ID'] != "":
+    #         playlistser.clear(x)
 
     for i in range(3):
         addplaying = NowPlaying(user_id=user_id, game_name=body['playing'][i]['game_name'], game_id=body['playing'][i]['game_id'], notes=body['playing'][i]['notes'], game_image=body['playing'][i]['game_image'])
