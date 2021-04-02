@@ -115,7 +115,7 @@ def id_username(user_id):
     body = request.get_json()
     get_user = User.query.get(user_id)
     if get_user is None:
-        raise APIException('Username does not exist.', status_code=404)
+        raise APIException('Username does not exist.', status_code=404) 
     response_body = get_user.serialize()
     
     return jsonify(response_body), 200
@@ -151,12 +151,12 @@ def post_editprofile(user_id):
         db.session.add(addgameprogression)
     db.session.commit()
 
-    for i in range(3):
+    for i in range(2):
         addlike = TagLike(user_id=user_id, name=body['liked'][i]['name'], tag_id=body['liked'][i]['tag_id'])
         db.session.add(addlike)
     db.session.commit()
 
-    for i in range(3):
+    for i in range(2):
         addislike = TagDislike(user_id=user_id, name=body['disliked'][i]['name'], tag_id=body['disliked'][i]['tag_id'])
         db.session.add(addislike)
     db.session.commit()
