@@ -177,7 +177,7 @@ def add_newplay(user_id):
 
     response_body = addplay1.serialize()
 
-    print("/PRINT-TEST/", response_body)
+    print("/PRINT-ADD/", response_body)
 
     return jsonify(response_body), 200
 
@@ -206,7 +206,7 @@ def edit_newplay(user_id, id):
     posteditplay = NowPlaying.query.filter_by(user_id=user_id)
     response_body = list(map(lambda x: x.serialize(), posteditplay))
 
-    print("/PRINT-TEST/", response_body)
+    print("/PRINT-EDIT/", response_body)
 
     return jsonify(response_body), 200
 
