@@ -120,6 +120,38 @@ def id_username(user_id):
     
     return jsonify(response_body), 200
 
+@app.route('/user/<int:user_id>/backlog/<int:id>', methods=['POST', 'PUT', 'DELETE'])
+def new_backlog(user_id, id):
+
+    body = request.get_json()
+
+    if request.method == 'POST':
+        addbacklog = Backlog(user_id=user_id, game_name=body['game_name'], game_id=body['game_id'], game_image=body['game_image'])
+        db.session.add(addbacklog)
+        db.session.commit()
+        response_body = addbacklog.serialize()
+        
+        return jsonify(response_body), 200
+
+    if request.method == 'PUT':
+        updatebacklog = Backlog.query.get(id)
+        updatebacklog.game_name = body["game_name"]
+        updatebacklog.game_id = body["game_id"]
+        updatebacklog.game_image = body["game_image"]
+        db.session.commit()
+        response_body = updatebacklog.serialize()
+
+        return jsonify(response_body), 200
+    
+    if request.method == 'DELETE':
+        deletebacklog = Backlog.query.get(id)
+        if deletebacklog is None:
+            raise APIException('ID not found', status_code=404)
+        db.session.delete(deletebacklog)
+        db.session.commit()
+
+        return jsonify('Deletion Successful'), 200
+        
 # PUT method for new listing for all tables
 @app.route('/user/<int:user_id>', methods=['PUT'])
 def post_editprofile(user_id):
