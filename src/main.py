@@ -96,7 +96,7 @@ def get_all_users():
 
     return jsonify(response_body), 200
 
-# Get / username
+# Get Username by Username
 @app.route('/user/<username>', methods=['GET'])
 def obtain_username(username):
 
@@ -108,7 +108,7 @@ def obtain_username(username):
     
     return jsonify(response_body), 200
 
-# Get / username
+# Get User by ID
 @app.route('/user/<int:user_id>', methods=['GET'])
 def id_username(user_id):
 
@@ -120,6 +120,7 @@ def id_username(user_id):
     
     return jsonify(response_body), 200
 
+# Backlog NEW, UPDATE, DELETE
 @app.route('/user/<int:user_id>/backlog/<int:id>', methods=['POST', 'PUT', 'DELETE'])
 def new_backlog(user_id, id):
 
@@ -151,228 +152,17 @@ def new_backlog(user_id, id):
         db.session.commit()
 
         return jsonify('Deletion Successful'), 200
-        
-# PUT method for new listing for all tables
-@app.route('/user/<int:user_id>', methods=['PUT'])
-def post_editprofile(user_id):
 
-    body = request.get_json()
-    print("// body", body)
-    if body is None:
-        raise APIException("Body is empty", status_code=404)
-
-    for i in range(3):
-        addplatform = Platform(user_id=user_id, platform_name=body['platforms'][i]['platform_name'], platform_id=body['platforms'][i]['platform_id'])
-        db.session.add(addplatform)
-    db.session.commit()
-
-    for i in range(3):
-        addplaying = NowPlaying(user_id=user_id, game_name=body['playing'][i]['game_name'], game_id=body['playing'][i]['game_id'], notes=body['playing'][i]['notes'], game_image=body['playing'][i]['game_image'])
-        db.session.add(addplaying)
-    db.session.commit()
-
-    for i in range(9):
-        addgameprogression = Highlights(user_id=user_id, 
-        game_name=body['game_progression'][i]['game_name'], game_id=body['game_progression'][i]['game_id'])
-        db.session.add(addgameprogression)
-    db.session.commit()
-
-    for i in range(2):
-        addlike = TagLike(user_id=user_id, name=body['liked'][i]['name'], tag_id=body['liked'][i]['tag_id'])
-        db.session.add(addlike)
-    db.session.commit()
-
-    for i in range(2):
-        addislike = TagDislike(user_id=user_id, name=body['disliked'][i]['name'], tag_id=body['disliked'][i]['tag_id'])
-        db.session.add(addislike)
-    db.session.commit()
-
-    obtainUser = User.query.get(user_id)
-    response_body = obtainUser.serialize()
-
-    return jsonify(response_body)
-
-    # Back up Duplicate code if loop ever stops working
-    # addplatform1 = Platform(user_id=user_id, platform_name=body['platforms'][0]['platform_name'], platform_id=body['platforms'][0]['platform_id'])
-    # db.session.add(addplatform1)
-    # db.session.commit()
-
-# testing purposes / PUT for adding new Now Playing
-@app.route('/user/<int:user_id>/newplay', methods=['PUT'])
-def add_newplay(user_id):
+# Backlog Get
+@app.route('/user/<int:user_id>/backlog', methods=['GET'])
+def get_backlog(user_id):
 
     body = request.get_json()
 
-    addplay1 = NowPlaying(user_id=user_id, game_name=body['game_name'], game_id=body['game_id'], notes=body['notes'], game_image=body['game_image'])
-    db.session.add(addplay1)
-    db.session.commit()
-
-    response_body = addplay1.serialize()
-
-    print("/PRINT-ADD/", response_body)
+    getbacklog = Backlog.query.filter_by(user_id=user_id)
+    response_body = list(map(lambda x: x.serialize(), getbacklog))
 
     return jsonify(response_body), 200
-
-# testing purposes / GET for grabbing any updated change to Now Playing
-@app.route('/user/<int:user_id>/getplay', methods=['GET'])
-def get_nowplay(user_id):
-
-    body = request.get_json()
-    obtainplay = NowPlaying.query.filter_by(user_id=user_id)
-    response_body = list(map(lambda x: x.serialize(), obtainplay))
-    print("/PRINT-GET/", response_body)
-
-    return jsonify(response_body), 200
-
-# testing purposes / PUT for updating a game already in Now Playing
-@app.route('/user/<int:user_id>/editplay/<int:id>', methods=['PUT'])
-def edit_newplay(user_id, id):
-    
-    body = request.get_json()
-    editplay = NowPlaying.query.get(id)
-    editplay.game_name = body["game_name"]
-    editplay.game_id = body["game_id"]
-    editplay.game_image = body["game_image"]
-    editplay.notes = body["notes"]
-    db.session.commit()
-    posteditplay = NowPlaying.query.filter_by(user_id=user_id)
-    response_body = list(map(lambda x: x.serialize(), posteditplay))
-
-    print("/PRINT-EDIT/", response_body)
-
-    return jsonify(response_body), 200
-
-# testing purposes / DELETE for removing one game from Now Playing
-@app.route('/user/<int:user_id>/deleteplay/<int:id>', methods=['DELETE'])
-def delete_newplay(user_id, id):
-
-    body = request.get_json()
-    deleteplay = NowPlaying.query.get(id)
-    db.session.delete(deleteplay)
-    db.session.commit()
-    postdeleteplay = NowPlaying.query.filter_by(user_id=user_id)
-    response_body = list(map(lambda x: x.serialize(), postdeleteplay))
-    print("/PRINT-DELETE/", response_body)
-
-    return jsonify(response_body), 200
-
-# Add a game for playing with username
-@app.route('/user/<username>/nplay', methods=['POST'])
-def adduser_playing(username):
-
-    body = request.get_json()
-
-    if body is None:
-        raise APIException("Body is empty, need: game_name & game_id.", status_code=404)
-    if 'game_name' not in body:
-        raise APIException("Missing game_name.", status_code=404)
-    if 'game_id' not in body:
-        raise APIException("Missing game_id", status_code=404)
-    if 'notes' not in body:
-        raise APIException("Missing notes, leave an empty string.", status_code=404)
-    
-    nowplaying1 = NowPlaying(username=username, game_name=body['game_name'], game_id=body['game_id'], notes=body['notes'])
-    db.session.add(nowplaying1)
-    db.session.commit()
-    response_body = nowplaying1.serialize()
-
-    print("/ print test for /", response_body)
-
-    return jsonify(response_body), 200
-
-# Add a game to favorites
-@app.route('/user/<int:user_id>/fav', methods=['POST', 'GET'])
-def addget_fav(user_id):
-
-    body = request.get_json()
-    
-    if request.method == 'POST':
-        if body is None:
-            raise APIException("Body is empty, need: game_name, game_image & game_id.", status_code=400)
-        if 'game_name' not in body:
-            raise APIException("Missing game_name.", status_code=400)
-        if 'game_id' not in body:
-            raise APIException("Missing game_id.", status_code=400)
-        if 'game_image' not in body:
-            raise APIException("Missing background_image", status_code=404)
-
-        favoritelist1 = FavoriteList(user_id=user_id, game_id=body['game_id'], game_name=body['game_name'], game_image=body['game_image'])
-        db.session.add(favoritelist1)
-        db.session.commit()
-        response_body = favoritelist1.serialize()
-
-        print("/ print test for /", response_body)
-
-        return jsonify(response_body), 200
-    
-    if request.method == 'GET':
-        get_fav = db.session.query(FavoriteList).filter(FavoriteList.user_id == user_id)
-        response_body = list(map(lambda x: x.serialize(), get_fav))
-        # fav_list = []
-
-        # for x in response_body:
-        #     if x['game_name'] != "":
-        #         fav_list.append(x['game_name']) # prints an array list of game names only.
-
-        return jsonify(response_body), 200
-    
-    return "Ok!", 200
-
-# Delete a game from favorite list
-@app.route('/user/<int:user_id>/fav/<int:favoritelist_id>', methods=['PUT','DELETE'])
-def putdel_fav(user_id, favoritelist_id):
-
-    body = request.get_json()
-
-    if request.method == 'PUT':
-        put_fav = FavoriteList.query.get(favoritelist_id)
-        if put_fav is None:
-            raise APIException("Body is empty, need: game_name & game_id", status_code=404)
-        if 'game_name' in body:
-            put_fav.game_name = body['game_name']
-        if 'game_id' in body:
-            put_fav.game_id = body['game_id']
-        if 'game_image' in body:
-            put_fav.game_image = body['game_image']
-        db.session.commit()
-        response_body = put_fav.serialize()
-
-        print("/ print test for /", response_body)
-
-        return jsonify(response_body), 200
-    
-    if request.method == 'DELETE':
-        remove_favorite = FavoriteList.query.get(favoritelist_id)
-        if remove_favorite is None:
-            raise APIException ('Game not found in Favorite List', status_code=404)
-        db.session.delete(remove_favorite)
-        db.session.commit()
-
-        new_list = FavoriteList.query.all()
-        response_body = list(map(lambda x: x.serialize(), new_list))
-        
-        print("/ print test for /", response_body)
-
-        return jsonify(response_body), 200
-    
-    return "Ok!", 200
-
-@app.route('/user/<int:user_id>/delfav/<int:favoritelist_id>', methods=['DELETE'])
-def delete_favorite(user_id, favoritelist_id):
-
-    remove_favorite = FavoriteList.query.get(favoritelist_id)
-    if remove_favorite is None:
-        raise APIException ('Game not found in Favorite List', status_code=404)
-    db.session.delete(remove_favorite)
-    db.session.commit()
-
-    new_list = FavoriteList.query.all()
-    response_body = list(map(lambda x: x.serialize(), new_list))
-    
-    print("/ print test for /", response_body)
-
-    return jsonify(response_body), 200
-
 
 # Add / Get Platforms
 @app.route('/user/<int:user_id>/plat', methods=['POST', 'GET'])
