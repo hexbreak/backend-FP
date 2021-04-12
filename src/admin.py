@@ -1,6 +1,6 @@
 import os
 from flask_admin import Admin
-from models import db, User, Platform, Highlights, NowPlaying, FavoriteList, TagLike, TagDislike
+from models import db, User, Platform, Backlog, GenreLike, GenreDislike, TagLike, TagDislike
 from flask_admin.contrib.sqla import ModelView
 
 def setup_admin(app):
@@ -11,10 +11,10 @@ def setup_admin(app):
     
     # Add your models here, for example this is how we add a the User model to the admin
     admin.add_view(ModelView(User, db.session))
-    admin.add_view(ModelView(FavoriteList, db.session))
     admin.add_view(ModelView(Platform, db.session))
-    admin.add_view(ModelView(Highlights, db.session))
-    admin.add_view(ModelView(NowPlaying, db.session))
+    admin.add_view(ModelView(Backlog, db.session))
+    admin.add_view(ModelView(GenreLike, db.session))
+    admin.add_view(ModelView(GenreDislike, db.session))
     admin.add_view(ModelView(TagLike, db.session))
     admin.add_view(ModelView(TagDislike, db.session))
 

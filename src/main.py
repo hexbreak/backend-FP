@@ -12,7 +12,7 @@ from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Platform, Highlights, NowPlaying, FavoriteList, TagLike, TagDislike
+from models import db, User, Platform, Backlog, GenreLike, GenreDislike, TagLike, TagDislike
 import datetime
 #from models import Person
 

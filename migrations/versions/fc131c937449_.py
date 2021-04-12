@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 70dab92ecc5f
+Revision ID: fc131c937449
 Revises: 
-Create Date: 2021-03-27 00:13:31.264786
+Create Date: 2021-04-12 16:03:36.639841
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '70dab92ecc5f'
+revision = 'fc131c937449'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,13 +23,11 @@ def upgrade():
     sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('username', sa.String(length=120), nullable=False),
     sa.Column('password', sa.String(length=80), nullable=False),
-    sa.Column('about', sa.String(length=1000), nullable=True),
-    sa.Column('image', sa.String(length=500), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
-    op.create_table('favorite_list',
+    op.create_table('backlog',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('game_name', sa.String(length=250), nullable=True),
@@ -38,21 +36,19 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('highlights',
+    op.create_table('genre_dislike',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('game_name', sa.String(length=120), nullable=True),
-    sa.Column('game_id', sa.String(length=120), nullable=True),
+    sa.Column('name', sa.String(length=50), nullable=True),
+    sa.Column('genre_id', sa.String(length=50), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('now_playing',
+    op.create_table('genre_like',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('game_name', sa.String(length=250), nullable=True),
-    sa.Column('game_id', sa.String(length=120), nullable=True),
-    sa.Column('notes', sa.String(length=500), nullable=True),
-    sa.Column('game_image', sa.String(length=200), nullable=True),
+    sa.Column('name', sa.String(length=50), nullable=True),
+    sa.Column('genre_id', sa.String(length=50), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -88,8 +84,8 @@ def downgrade():
     op.drop_table('tag_like')
     op.drop_table('tag_dislike')
     op.drop_table('platform')
-    op.drop_table('now_playing')
-    op.drop_table('highlights')
-    op.drop_table('favorite_list')
+    op.drop_table('genre_like')
+    op.drop_table('genre_dislike')
+    op.drop_table('backlog')
     op.drop_table('user')
     # ### end Alembic commands ###

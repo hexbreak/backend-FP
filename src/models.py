@@ -7,14 +7,12 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     username = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
-    about = db.Column(db.String(1000), unique=False, nullable=True)
-    image = db.Column(db.String(500), unique=False, nullable=True)
-    favorites = db.relationship('FavoriteList', backref='user', lazy=True)
-    platforms = db.relationship('Platform', backref='user', lazy=True)
-    game_progression = db.relationship('Highlights', backref='user', lazy=True)
-    playing = db.relationship('NowPlaying', backref='user', lazy=True)
-    liked = db.relationship('TagLike', backref='user', lazy=True)
-    disliked = db.relationship('TagDislike', backref='user', lazy=True)
+    user_games = db.relationship('Backlog', backref='user', lazy=True)
+    user_platforms = db.relationship('Platform', backref='user', lazy=True)
+    genres_liked = db.relationship('GenreLike', backref='user', lazy=True)
+    genres_disliked = db.relationship('GenreDislike', backref='user', lazy=True)
+    tags_liked = db.relationship('TagLike', backref='user', lazy=True)
+    tags_disliked = db.relationship('TagDislike', backref='user', lazy=True)
 
     def __repr__(self):
         return '<User %r>' % self.id
@@ -24,14 +22,12 @@ class User(db.Model):
             "id": self.id,
             "email": self.email,
             "username": self.username,
-            "about": self.about,
-            "image": self.image,
-            "favorites": list(map(lambda x: x.serialize(), self.favorites)),
-            "platforms": list(map(lambda x: x.serialize(), self.platforms)),
-            "game_progression": list(map(lambda x: x.serialize(), self.game_progression)),
-            "playing": list(map(lambda x: x.serialize(), self.playing)),
-            "liked": list(map(lambda x: x.serialize(), self.liked)),
-            "disliked": list(map(lambda x: x.serialize(), self.disliked))
+            "user_games": list(map(lambda x: x.serialize(), self.user_games)),
+            "user_platforms": list(map(lambda x: x.serialize(), self.user_platforms)),
+            "genres_liked": list(map(lambda x: x.serialize(), self.genres_liked)),
+            "genres_disliked": list(map(lambda x: x.serialize(), self.genres_disliked)),
+            "tags_liked": list(map(lambda x: x.serialize(), self.tags_liked)),
+            "tags_disliked": list(map(lambda x: x.serialize(), self.tags_disliked))
         }
 
 class Platform(db.Model):
@@ -51,45 +47,7 @@ class Platform(db.Model):
             "platform_id": self.platform_id
         }
 
-class Highlights(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    game_name = db.Column(db.String(120), unique=False, nullable=True)
-    game_id = db.Column(db.String(120), unique=False, nullable=True)
-
-    def __repr__(self):
-        return '<Highlights %r>' % self.id
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "game_name": self.game_name,
-            "game_id": self.game_id,
-        }
-
-class NowPlaying(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    game_name = db.Column(db.String(250), unique=False, nullable=True)
-    game_id = db.Column(db.String(120), unique=False, nullable=True)
-    notes = db.Column(db.String(500), unique=False, nullable=True)
-    game_image = db.Column(db.String(200), unique=False, nullable=True)
-
-    def __repr__(self):
-        return '<NowPlaying %r>' % self.id
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "game_name": self.game_name,
-            "game_id": self.game_id,
-            "notes": self.notes,
-            "game_image": self.game_image
-        }
-
-class FavoriteList(db.Model):
+class Backlog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     game_name = db.Column(db.String(250), unique=False, nullable=True)
@@ -97,7 +55,7 @@ class FavoriteList(db.Model):
     game_image = db.Column(db.String(120), unique=False, nullable=True)
 
     def __repr__(self):
-        return '<FavoriteList %r>' % self.id
+        return '<Backlog %r>' % self.id
 
     def serialize(self):
         return {
@@ -106,6 +64,40 @@ class FavoriteList(db.Model):
             "game_name": self.game_name,
             "game_id": self.game_id,
             "game_image": self.game_image
+        }
+
+class GenreLike(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(50), unique=False, nullable=True)
+    genre_id = db.Column(db.String(50), unique=False, nullable=True)
+
+    def __repr__(self):
+        return '<GenreLike %r>' % self.id
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "name": self.name,
+            "genre_id": self.genre_id
+        }
+
+class GenreDislike(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(50), unique=False, nullable=True)
+    genre_id = db.Column(db.String(50), unique=False, nullable=True)
+
+    def __repr__(self):
+        return '<GenreDislike %r>' % self.id
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "name": self.name,
+            "genre_id": self.genre_id
         }
 
 class TagLike(db.Model):
@@ -141,4 +133,4 @@ class TagDislike(db.Model):
             "name": self.name,
             "tag_id": self.tag_id
             
-        }  
+        }
