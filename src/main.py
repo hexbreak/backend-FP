@@ -120,9 +120,9 @@ def id_username(user_id):
     
     return jsonify(response_body), 200
 
-# Backlog NEW, UPDATE, DELETE
-@app.route('/user/<int:user_id>/backlog/<int:id>', methods=['POST', 'PUT', 'DELETE'])
-def new_backlog(user_id, id):
+# Backlog Post (Add) / Get (Obtain)
+@app.route('/user/<int:user_id>/backlog', methods=['POST', 'GET'])
+def get_backlog(user_id):
 
     body = request.get_json()
 
@@ -133,6 +133,20 @@ def new_backlog(user_id, id):
         response_body = addbacklog.serialize()
         
         return jsonify(response_body), 200
+
+    if request.method == 'GET':
+        getbacklog = Backlog.query.filter_by(user_id=user_id)
+        response_body = list(map(lambda x: x.serialize(), getbacklog))
+
+        return jsonify(response_body), 200
+
+    return "Ok!", 200
+
+# Backlog PUT (Update), DELETE (Remove)
+@app.route('/user/<int:user_id>/backlog/<int:id>', methods=['PUT', 'DELETE'])
+def new_backlog(user_id, id):
+
+    body = request.get_json()
 
     if request.method == 'PUT':
         updatebacklog = Backlog.query.get(id)
@@ -152,17 +166,6 @@ def new_backlog(user_id, id):
         db.session.commit()
 
         return jsonify('Deletion Successful'), 200
-
-# Backlog Get
-@app.route('/user/<int:user_id>/backlog', methods=['GET'])
-def get_backlog(user_id):
-
-    body = request.get_json()
-
-    getbacklog = Backlog.query.filter_by(user_id=user_id)
-    response_body = list(map(lambda x: x.serialize(), getbacklog))
-
-    return jsonify(response_body), 200
 
 # POST / GET Platforms
 @app.route('/user/<int:user_id>/platforms', methods=['POST', 'GET'])
