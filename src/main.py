@@ -164,79 +164,41 @@ def get_backlog(user_id):
 
     return jsonify(response_body), 200
 
-# Add / Get Platforms
-@app.route('/user/<int:user_id>/plat', methods=['POST', 'GET'])
-def add_platform(user_id):
+# POST / GET Platforms
+@app.route('/user/<int:user_id>/platforms', methods=['POST', 'GET'])
+def addget_platform(user_id):
 
     body = request.get_json()
 
     if request.method == 'POST':
-        if body is None:
-            raise APIException("Body is empty, need: platform_name & platform_id", status_code=404)
-        if 'platform_name' not in body:
-            raise APIException("Missing platform_name", status_code=404)
-        if 'platform_id' not in body:
-            raise APIException("Missing platform_id", status_code=404)
-        
-        platform1 = Platform(user_id=user_id, platform_name=body['platform_name'], platform_id=body['platform_id'])
-        db.session.add(platform1)
+        addplatform = Platform(user_id=user_id, platform_name=body['platform_name'], platform_id=body['platform_id'])
+        db.session.add(addplatform)
         db.session.commit()
-        response_body = platform1.serialize()
+        response_body = addplatform.serialize()
 
-        print("/ print test for /", response_body)
-
-        return jsonify(response_body)
+        return jsonify(response_body), 200
     
     if request.method == 'GET':
-        get_plat = db.session.query(Platform).filter(Platform.user_id == user_id)
-        response_body = list(map(lambda x: x.serialize(), get_plat))
-        plat_list = []
+        getplatforms = db.session.query(Platform).filter(Platform.user_id == user_id)
+        response_body = list(map(lambda x: x.serialize(), getplatforms))
 
-        for x in response_body:
-            if x['platform_name'] != "":
-                plat_list.append(x['platform_name'])
+        return jsonify(response_body), 200
 
-        return jsonify(plat_list), 200
-    
-    return "Ok!", 200
-        
+    return "All Good!", 200
 
-# Update / Delete Platforms
-@app.route('/user/<int:user_id>/plat/<int:plat_id>', methods=['PUT', 'DELETE'])
-def putdel_platform(user_id, plat_id):
+# DELETE (Remove) Platform
+@app.route('/user/<int:user_id>/platforms/<int:id>', methods=['DELETE'])
+def remove_platform(user_id, id):
 
     body = request.get_json()
 
-    if request.method == 'PUT':
-        put_plat = Platform.query.get(plat_id)
-        if put_plat is None:
-            raise APIException("Body is empty, need: platform_name & platform_id", status_code=404)
-        if 'platform_name' in body:
-            put_plat.platform_name = body['platform_name']
-        if 'platform_id' in body:
-            put_plat.platform_id = body['platform_id']
-        db.session.commit()
-        response_body = put_plat.serialize()
+    removeplatform = Platform.query.get(id)
+    if removeplatform is None:
+        raise APIException('ID not found', status_code=404)
+    db.session.delete(removeplatform)
+    db.session.commit()
 
-        print("/ print test for /", response_body)
-
-        return jsonify(response_body), 200
-
-    if request.method == 'DELETE':
-        del_plat = Platform.query.get(plat_id)
-        if del_plat is None:
-            raise APIException("Platform not found.", status_code=404)
-        db.session.delete(del_plat)
-        db.session.commit()
-
-        plat_list = Platform.query.all()
-        response_body = list(map(lambda x: x.serialize(), plat_list))
-        
-        print("/ print test for /", response_body)
-
-        return jsonify(response_body), 200
-    
-    return "Ok!", 200
+    return jsonify('Deletion Successful'), 200
 
 # Post / Get a game in Highlights
 @app.route('/user/<int:user_id>/hl', methods=['POST', 'GET'])
