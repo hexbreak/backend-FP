@@ -142,35 +142,37 @@ def get_backlog(user_id):
 
     return "Ok!", 200
 
-# Backlog PUT (Update), DELETE (Remove)
-@app.route('/user/<int:user_id>/backlog/<int:id>', methods=['PUT', 'DELETE'])
-def new_backlog(user_id, id):
+# Backlog PUT (Update)
+@app.route('/user/<int:user_id>/updatebl/<int:id>', methods=['PUT'])
+def update_backlog(user_id, id):
 
     body = request.get_json()
 
-    if request.method == 'PUT':
-        updatebacklog = Backlog.query.get(id)
-        if updatebacklog is None:
-            raise APIException('ID not found', status_code=404)
-        if "game_name" in body:
-            updatebacklog.game_name = body["game_name"]
-        if "game_id" in body:
-            updatebacklog.game_id = body["game_id"]
-        if "game_image" in body:
-            updatebacklog.game_image = body["game_image"]
-        db.session.commit()
-        response_body = updatebacklog.serialize()
+    updatebacklog = Backlog.query.get(id)
+    if updatebacklog is None:
+        raise APIException('ID not found', status_code=404)
+    if "game_name" in body:
+        updatebacklog.game_name = body["game_name"]
+    if "game_id" in body:
+        updatebacklog.game_id = body["game_id"]
+    if "game_image" in body:
+        updatebacklog.game_image = body["game_image"]
+    db.session.commit()
+    response_body = updatebacklog.serialize()
 
-        return jsonify(response_body), 200
+    return jsonify(response_body), 200
+
+# Backlog DELETE (Remove)
+@app.route('/user/<int:user_id>/removebl/<int:id>', methods=['DELETE'])
+def new_backlog(user_id, id):
     
-    if request.method == 'DELETE':
-        deletebacklog = Backlog.query.get(id)
-        if deletebacklog is None:
-            raise APIException('ID not found', status_code=404)
-        db.session.delete(deletebacklog)
-        db.session.commit()
+    deletebacklog = Backlog.query.get(id)
+    # if deletebacklog is None:
+    #     raise APIException('ID not found', status_code=404)
+    db.session.delete(deletebacklog)
+    db.session.commit()
 
-        return jsonify('Deletion Successful'), 200
+    return jsonify('Deletion Successful'), 200
 
 # Platforms POST (Add), GET (Obtain)
 @app.route('/user/<int:user_id>/platforms', methods=['POST', 'GET'])
