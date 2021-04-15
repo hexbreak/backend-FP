@@ -150,9 +150,14 @@ def new_backlog(user_id, id):
 
     if request.method == 'PUT':
         updatebacklog = Backlog.query.get(id)
-        updatebacklog.game_name = body["game_name"]
-        updatebacklog.game_id = body["game_id"]
-        updatebacklog.game_image = body["game_image"]
+        if updatebacklog is None:
+            raise APIException('ID not found', status_code=404)
+        if "game_name" in body:
+            updatebacklog.game_name = body["game_name"]
+        if "game_id" in body:
+            updatebacklog.game_id = body["game_id"]
+        if "game_image" in body:
+            updatebacklog.game_image = body["game_image"]
         db.session.commit()
         response_body = updatebacklog.serialize()
 
