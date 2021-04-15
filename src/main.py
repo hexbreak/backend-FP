@@ -275,115 +275,77 @@ def remove_genredislikes(user_id, id):
 
     return jsonify('Deletion successful'), 200
 
-# Add a tag to liked tags
-@app.route('/user/<int:user_id>/like', methods=['POST'])
-def addtags_like(user_id):
+# TagLike POST (Add) / GET (Obtain)
+@app.route('/user/<int:user_id>/taglike', methods=['POST', 'GET'])
+def postget_taglike(user_id):
 
     body = request.get_json()
 
-    if body is None:
-        raise APIException("Body is empty, need: tag_name & tag_id.", status_code=400)
-    if 'tag_name' not in body:
-        raise APIException("Missing tag_name.", status_code=400)
-    if 'tag_id' not in body:
-        raise APIException("Missing tag_id.", status_code=400)
+    if request.method == 'POST':
+        addlike = TagLike(user_id=user_id, name=body['name'], tag_id=body['tag_id'])
+        db.session.add(addlike)
+        db.session.commit()
+        response_body = addlike.serialize()
 
-    liked1 = Liked(user_id=user_id, tag_name=body['tag_name'], tag_id=body['tag_id'])
-    db.session.add(liked1)
-    db.session.commit()
-    response_body = liked1.serialize()
+        return jsonify(response_body), 200
 
-    print("/ print test for /", response_body)
+    if request.method == 'GET':
+        getlikedlist = TagLike.query.filter_by(user_id=user_id)
+        response_body = list(map(lambda x: x.serialize(), getlikedlist))
 
-    return jsonify(response_body), 200
+        return jsonify(response_body), 200
 
-# Get Liked tags listed in array
-@app.route('/user/<int:user_id>/like', methods=['GET'])
-def gettags_liked(user_id):
+    return "Ok!", 200
 
-    body = request.get_json()
-
-    get_likes = db.session.query(Liked).filter(Liked.user_id == user_id)
-    response_body = list(map(lambda x: x.serialize(), get_likes))
-    likes_list = []
-
-    for x in response_body:
-        if x['tag_name'] != "":
-            likes_list.append(x['tag_name'])
-
-    return jsonify(likes_list), 200
-
-# Delete a Liked tag
-@app.route('/user/<int:user_id>/like/<int:liked_id>', methods=['DELETE'])
-def deltags_liked(user_id, liked_id):
-
-    del_like = Liked.query.get(liked_id)
-    if del_like is None:
-        raise APIException ('Tag not found in Liked Tags', status_code=404)
-    db.session.delete(del_like)
-    db.session.commit()
-
-    tag_list = Liked.query.all()
-    response_body = list(map(lambda x: x.serialize(), tag_list))
-    
-    print("/ print test for /", response_body)
-
-    return jsonify(response_body), 200
-
-# Add a tag to disliked tags
-@app.route('/user/<int:user_id>/dislike', methods=['POST'])
-def addtags_dislike(user_id):
+# TagLike DELETE (Remove)
+@app.route('/user/<int:user_id>/detl/<int:id>', methods=['DELETE'])
+def remove_taglikes(user_id, id):
 
     body = request.get_json()
 
-    if body is None:
-        raise APIException("Body is empty, need: tag_name & tag_id.", status_code=400)
-    if 'tag_name' not in body:
-        raise APIException("Missing tag_name.", status_code=400)
-    if 'tag_id' not in body:
-        raise APIException("Missing tag_id.", status_code=400)
-
-    dislike1 = Disliked(user_id=user_id, tag_name=body['tag_name'], tag_id=body['tag_id'])
-    db.session.add(dislike1)
+    removetag = TagLike.query.get(id)
+    if removetag is None:
+        raise APIException('ID not found', status_code=404)
+    db.session.delete(removetag)
     db.session.commit()
-    response_body = dislike1.serialize()
 
-    print("/ print test for /", response_body)
+    return jsonify('Deletion successful'), 200
 
-    return jsonify(response_body)
-
-# Get Disliked tags listed in array
-@app.route('/user/<int:user_id>/dislike', methods=['GET'])
-def gettags_disliked(user_id):
+# TagDislike POST (Add) / GET (Obtain)
+@app.route('/user/<int:user_id>/tagdislike', methods=['POST', 'GET'])
+def postget_tagdislikes(user_id):
 
     body = request.get_json()
 
-    get_dislikes = db.session.query(Disliked).filter(Disliked.user_id == user_id)
-    response_body = list(map(lambda x: x.serialize(), get_dislikes))
-    dislikes_list = []
+    if request.method == 'POST':
+        addislike = TagDislike(user_id=user_id, name=body['name'], tag_id=body['tag_id'])
+        db.session.add(addislike)
+        db.session.commit()
+        response_body = addislike.serialize()
 
-    for x in response_body:
-        if x['tag_name'] != "":
-            dislikes_list.append(x['tag_name'])
+        return jsonify(response_body), 200
 
-    return jsonify(dislikes_list), 200
+    if request.method == 'GET':
+        getdislikedlist = TagDislike.query.filter_by(user_id=user_id)
+        response_body = list(map(lambda x: x.serialize(), getdislikedlist))
 
-# Delete a Disliked tag
-@app.route('/user/<int:user_id>/disliked/<int:disliked_id>', methods=['DELETE'])
-def deltags_dislike(user_id, disliked_id):
+        return jsonify(response_body), 200
 
-    del_dislike = Disliked.query.get(disliked_id)
-    if del_dislike is None:
-        raise APIException ('Tag not found in Disliked Tags', status_code=404)
-    db.session.delete(del_dislike)
+    return "Ok!", 200
+
+# TagDislike DELETE (Remove)
+@app.route('/user/<int:user_id>/detd/<int:id>', methods=['DELETE'])
+def remove_tagdislikes(user_id, id):
+
+    body = request.get_json()
+
+    removetag = TagDislike.query.get(id)
+    if removetag is None:
+        raise APIException('ID not found', status_code=404)
+    db.session.delete(removetag)
     db.session.commit()
 
-    tag_list = Disliked.query.all()
-    response_body = list(map(lambda x: x.serialize(), tag_list))
-    
-    print("/ print test for /", response_body)
-
-    return jsonify(response_body), 200
+    return jsonify('Deletion successful'), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
