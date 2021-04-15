@@ -167,7 +167,7 @@ def new_backlog(user_id, id):
 
         return jsonify('Deletion Successful'), 200
 
-# POST / GET Platforms
+# Platforms POST (Add), GET (Obtain)
 @app.route('/user/<int:user_id>/platforms', methods=['POST', 'GET'])
 def addget_platform(user_id):
 
@@ -189,7 +189,7 @@ def addget_platform(user_id):
 
     return "All Good!", 200
 
-# DELETE (Remove) Platform
+# Platforms DELETE (Remove)
 @app.route('/user/<int:user_id>/platforms/<int:id>', methods=['DELETE'])
 def remove_platform(user_id, id):
 
@@ -203,78 +203,41 @@ def remove_platform(user_id, id):
 
     return jsonify('Deletion Successful'), 200
 
-# Post / Get a game in Highlights
-@app.route('/user/<int:user_id>/hl', methods=['POST', 'GET'])
-def postget_highlight(user_id):
+# GenreLikes POST (Add) / GET (Obtain)
+@app.route('/user/<int:user_id>/genrelikes', methods=['POST', 'GET'])
+def addget_genrelikes(user_id):
 
     body = request.get_json()
 
     if request.method == 'POST':
-        if body is None:
-            raise APIException("Body is empty, need: game_name & game_id", status_code=404)
-        if 'game_name' not in body:
-            raise APIException("Missing game_name", status_code=404)
-        if 'game_id' not in body:
-            raise APIException("Missing game_id", status_code=404)
-        
-        highlight1 = Highlights(user_id=user_id, game_name=body['game_name'], game_id=body['game_id'])
-        db.session.add(highlight1)
+        addlike = GenreLike(user_id=user_id, name=body['name'], genre_id=body['genre_id'])
+        db.session.add(addlike)
         db.session.commit()
-        response_body = highlight1.serialize()
+        response_body = addlike.serialize()
 
-        print("/ print test for /", response_body)
+        return jsonify(response_body), 200
 
-        return jsonify(response_body)
-    
     if request.method == 'GET':
-        get_hl = db.session.query(Highlights).filter(Highlights.user_id == user_id)
-        response_body = list(map(lambda x: x.serialize(), get_hl))
-        hl_list = []
+        getlikedlist = GenreLike.query.filter_by(user_id=user_id)
+        response_body = list(map(lambda x: x.serialize(), getlikedlist))
 
-        for x in response_body:
-            if x['game_name'] != "":
-                hl_list.append(x['game_name'])
-
-        return jsonify(hl_list), 200
+        return jsonify(response_body), 200
 
     return "Ok!", 200
 
-# Update / Delete Platforms
-@app.route('/user/<int:user_id>/hl/<int:hl_id>', methods=['PUT', 'DELETE'])
-def putdel_highlight(user_id, hl_id):
+# GenreLikes DELETE (Remove)
+@app.route('/user/<int:user_id>/degl/<int:id>', methods=['DELETE'])
+def remove_genrelikes(user_id, id):
 
     body = request.get_json()
 
-    if request.method == 'PUT':
-        put_hl = Highlights.query.get(hl_id)
-        if put_hl is None:
-            raise APIException("Body is empty, need: platform_name & platform_id", status_code=404)
-        if 'game_name' in body:
-            put_hl.game_name = body['game_name']
-        if 'game_id' in body:
-            put_hl.game_id = body['game_id']
-        db.session.commit()
-        response_body = put_hl.serialize()
+    removelike = GenreLike.query.get(id)
+    if removelike is None:
+        raise APIException('ID not found', status_code=404)
+    db.session.delete(removelike)
+    db.session.commit()
 
-        print("/ print test for /", response_body)
-
-        return jsonify(response_body), 200
-
-    if request.method == 'DELETE':
-        del_hl = Highlights.query.get(hl_id)
-        if del_hl is None:
-            raise APIException("Game not found.", status_code=404)
-        db.session.delete(del_hl)
-        db.session.commit()
-
-        hl_list = Highlights.query.all()
-        response_body = list(map(lambda x: x.serialize(), hl_list))
-        
-        print("/ print test for /", response_body)
-
-        return jsonify(response_body), 200
-    
-    return "Ok!", 200
+    return jsonify('Deletion successful'), 200
 
 # Add a tag to liked tags
 @app.route('/user/<int:user_id>/like', methods=['POST'])
