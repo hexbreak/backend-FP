@@ -203,7 +203,7 @@ def remove_platform(user_id, id):
 
     return jsonify('Deletion Successful'), 200
 
-# GenreLikes POST (Add) / GET (Obtain)
+# GenreLike POST (Add) / GET (Obtain)
 @app.route('/user/<int:user_id>/genrelikes', methods=['POST', 'GET'])
 def addget_genrelikes(user_id):
 
@@ -225,7 +225,7 @@ def addget_genrelikes(user_id):
 
     return "Ok!", 200
 
-# GenreLikes DELETE (Remove)
+# GenreLike DELETE (Remove)
 @app.route('/user/<int:user_id>/degl/<int:id>', methods=['DELETE'])
 def remove_genrelikes(user_id, id):
 
@@ -235,6 +235,42 @@ def remove_genrelikes(user_id, id):
     if removelike is None:
         raise APIException('ID not found', status_code=404)
     db.session.delete(removelike)
+    db.session.commit()
+
+    return jsonify('Deletion successful'), 200
+
+# GenreDislike POST (Add) / GET (Obtain)
+@app.route('/user/<int:user_id>/genredislikes', methods=['POST', 'GET'])
+def addget_genredislikes(user_id):
+
+    body = request.get_json()
+
+    if request.method == 'POST':
+        addislike = GenreDislike(user_id=user_id, name=body['name'], genre_id=body['genre_id'])
+        db.session.add(addislike)
+        db.session.commit()
+        response_body = addislike.serialize()
+
+        return jsonify(response_body), 200
+
+    if request.method == 'GET':
+        getdislikedlist = GenreDislike.query.filter_by(user_id=user_id)
+        response_body = list(map(lambda x: x.serialize(), getdislikedlist))
+
+        return jsonify(response_body), 200
+
+    return "Ok!", 200
+
+# GenreDislike DELETE (Remove)
+@app.route('/user/<int:user_id>/degd/<int:id>', methods=['DELETE'])
+def remove_genredislikes(user_id, id):
+
+    body = request.get_json()
+
+    removedislike = GenreDislike.query.get(id)
+    if removedislike is None:
+        raise APIException('ID not found', status_code=404)
+    db.session.delete(removedislike)
     db.session.commit()
 
     return jsonify('Deletion successful'), 200
