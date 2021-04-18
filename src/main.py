@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for, make_response
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
@@ -10,17 +10,25 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
+from flask_jwt_extended import get_jwt
+from flask_jwt_extended import set_access_cookies
+from flask_jwt_extended import unset_jwt_cookies
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Platform, Backlog, GenreLike, GenreDislike, TagLike, TagDislike
-import datetime
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 #from models import Person
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["JWT_COOKIE_SECURE"] = True
+app.config["JWT_TOKEN_LOCATION"] = ["headers"]
 app.config["JWT_SECRET_KEY"] = "game-finder"  # Change this!
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=3)
 jwt = JWTManager(app)
 MIGRATE = Migrate(app, db)
 db.init_app(app)
@@ -36,6 +44,21 @@ def handle_invalid_usage(error):
 @app.route('/')
 def sitemap():
     return generate_sitemap(app)
+
+# Using an `after_request` callback, we refresh any token that is within 30
+# minutes of expiring. Change the timedeltas to match the needs of your application.
+@app.after_request
+def refresh_expiring_jwts(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(hours=1))
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+        return response
+    except (RuntimeError, KeyError):
+        # Case where there is not a valid JWT. Just return the original respone
+        return response
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -60,29 +83,25 @@ def register():
 # create_access_token() function is used to actually generate the JWT.
 @app.route("/login", methods=["POST"])
 def login():
-
     credentials = request.json
     username = credentials.get("username", None)
     password = credentials.get("password", None)
     user = User.query.filter_by(username=username, password=password).first()
     if user is None:
         return jsonify("Invalid email or password."), 400
-
-    expires = datetime.timedelta(days=7)
-    access_token = create_access_token(identity=username, expires_delta=expires)
-    response = { "user_id": user.id, "token": access_token }
-
+    access_token = create_access_token(identity=user.id)
+    response = {"token" : access_token}
     return jsonify(response)
 
 # Protect a route with jwt_required, which will kick out requests
 # without a valid JWT present.
-@app.route("/protected", methods=["GET"])
+@app.route("/protected", methods=["GET", "POST"])
 @jwt_required()
 def protected():
     # Access the identity of the current user with get_jwt_identity
     current_user = get_jwt_identity()
     print(current_user)
-    return jsonify(logged_in_as=current_user), 200
+    return jsonify({"user_id" : current_user}), 200
 
 # This get method grabs EVERYTHING we have collected from the Users.
 @app.route('/users', methods=['GET'])
@@ -111,7 +130,6 @@ def obtain_username(username):
 # Get User by ID
 @app.route('/user/<int:user_id>', methods=['GET'])
 def id_username(user_id):
-
     body = request.get_json()
     get_user = User.query.get(user_id)
     if get_user is None:
@@ -127,7 +145,7 @@ def get_backlog(user_id):
     body = request.get_json()
 
     if request.method == 'POST':
-        addbacklog = Backlog(user_id=user_id, game_name=body['game_name'], game_id=body['game_id'], game_image=body['game_image'])
+        addbacklog = Backlog(user_id=user_id, game_name=body['game_name'], game_id=body['game_id'], game_image=body['game_image'], game_status=body['game_status'])
         db.session.add(addbacklog)
         db.session.commit()
         response_body = addbacklog.serialize()
@@ -158,6 +176,8 @@ def new_backlog(user_id, id):
             updatebacklog.game_id = body["game_id"]
         if "game_image" in body:
             updatebacklog.game_image = body["game_image"]
+        if "game_status" in body:
+            updatebacklog.game_status = body["game_status"]
         db.session.commit()
         response_body = updatebacklog.serialize()
 
@@ -351,6 +371,22 @@ def remove_tagdislikes(user_id, id):
     db.session.commit()
 
     return jsonify('Deletion successful'), 200
+
+@app.route('/user/<int:user_id>/', methods=['PUT'])
+def handle_edit(todo_id):
+    body = request.json
+    todo = Todo.query.get(todo_id)
+    if todo is None:
+        raise APIException('User not found', status_code=404)
+    if "label" in body:
+        todo.label = body["label"]
+    if "done" in body:
+        todo.done  = body["done"]
+    db.session.commit()
+    todos = Todo.query.all()
+    response_body = list(map(lambda x: x.serialize(), todos))
+    return jsonify(response_body), 200 
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':

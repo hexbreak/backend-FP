@@ -53,6 +53,7 @@ class Backlog(db.Model):
     game_name = db.Column(db.String(250), unique=False, nullable=True)
     game_id = db.Column(db.String(120), unique=False, nullable=True)
     game_image = db.Column(db.String(120), unique=False, nullable=True)
+    game_status = db.Column(db.String(30), unique=False, nullable=True)
 
     def __repr__(self):
         return '<Backlog %r>' % self.id
@@ -63,7 +64,8 @@ class Backlog(db.Model):
             "user_id": self.user_id,
             "game_name": self.game_name,
             "game_id": self.game_id,
-            "game_image": self.game_image
+            "game_image": self.game_image,
+            "game_status": self.game_status
         }
 
 class GenreLike(db.Model):
@@ -131,6 +133,5 @@ class TagDislike(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "name": self.name,
-            "tag_id": self.tag_id
-            
+            "tag_id": self.tag_id       
         }
