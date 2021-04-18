@@ -160,9 +160,9 @@ def get_backlog(user_id):
 
     return "Ok!", 200
 
-# Backlog PUT (Update), DELETE (Remove)
-@app.route('/user/<int:user_id>/backlog/<int:id>', methods=['PUT', 'DELETE'])
-def new_backlog(user_id, id):
+# Backlog PUT (Update)
+@app.route('/user/<int:user_id>/updatebl/<int:id>', methods=['PUT'])
+def update_backlog(user_id, id):
 
     body = request.get_json()
 
@@ -181,16 +181,19 @@ def new_backlog(user_id, id):
         db.session.commit()
         response_body = updatebacklog.serialize()
 
-        return jsonify(response_body), 200
-    
-    if request.method == 'DELETE':
-        deletebacklog = Backlog.query.get(id)
-        if deletebacklog is None:
-            raise APIException('ID not found', status_code=404)
-        db.session.delete(deletebacklog)
-        db.session.commit()
+    return jsonify(response_body), 200
 
-        return jsonify('Deletion Successful'), 200
+# Backlog DELETE (Remove)
+@app.route('/user/<int:user_id>/removebl/<int:id>', methods=['DELETE'])
+def new_backlog(user_id, id):
+    
+    deletebacklog = Backlog.query.get(id)
+    # if deletebacklog is None:
+    #     raise APIException('ID not found', status_code=404)
+    db.session.delete(deletebacklog)
+    db.session.commit()
+
+    return jsonify('Deletion Successful'), 200
 
 # Platforms POST (Add), GET (Obtain)
 @app.route('/user/<int:user_id>/platforms', methods=['POST', 'GET'])
@@ -371,22 +374,6 @@ def remove_tagdislikes(user_id, id):
     db.session.commit()
 
     return jsonify('Deletion successful'), 200
-
-@app.route('/user/<int:user_id>/', methods=['PUT'])
-def handle_edit(todo_id):
-    body = request.json
-    todo = Todo.query.get(todo_id)
-    if todo is None:
-        raise APIException('User not found', status_code=404)
-    if "label" in body:
-        todo.label = body["label"]
-    if "done" in body:
-        todo.done  = body["done"]
-    db.session.commit()
-    todos = Todo.query.all()
-    response_body = list(map(lambda x: x.serialize(), todos))
-    return jsonify(response_body), 200 
-
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
