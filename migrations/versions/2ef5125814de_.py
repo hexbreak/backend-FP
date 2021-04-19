@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 990064970fae
+Revision ID: 2ef5125814de
 Revises: 
-Create Date: 2021-04-18 17:43:54.349207
+Create Date: 2021-04-19 18:52:17.923314
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '990064970fae'
+revision = '2ef5125814de'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -40,7 +40,7 @@ def upgrade():
     op.create_table('genre_dislike',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=50), nullable=True),
+    sa.Column('genre_name', sa.String(length=50), nullable=True),
     sa.Column('genre_id', sa.String(length=50), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -48,7 +48,7 @@ def upgrade():
     op.create_table('genre_like',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=50), nullable=True),
+    sa.Column('genre_name', sa.String(length=50), nullable=True),
     sa.Column('genre_id', sa.String(length=50), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -64,7 +64,7 @@ def upgrade():
     op.create_table('tag_dislike',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=50), nullable=True),
+    sa.Column('tag_name', sa.String(length=50), nullable=True),
     sa.Column('tag_id', sa.String(length=50), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -72,7 +72,7 @@ def upgrade():
     op.create_table('tag_like',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=50), nullable=True),
+    sa.Column('tag_name', sa.String(length=50), nullable=True),
     sa.Column('tag_id', sa.String(length=50), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')

@@ -71,7 +71,7 @@ class Backlog(db.Model):
 class GenreLike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    name = db.Column(db.String(50), unique=False, nullable=True)
+    genre_name = db.Column(db.String(50), unique=False, nullable=True)
     genre_id = db.Column(db.String(50), unique=False, nullable=True)
 
     def __repr__(self):
@@ -81,14 +81,14 @@ class GenreLike(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "name": self.name,
+            "genre_name": self.genre_name,
             "genre_id": self.genre_id
         }
 
 class GenreDislike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    name = db.Column(db.String(50), unique=False, nullable=True)
+    genre_name = db.Column(db.String(50), unique=False, nullable=True)
     genre_id = db.Column(db.String(50), unique=False, nullable=True)
 
     def __repr__(self):
@@ -98,14 +98,14 @@ class GenreDislike(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "name": self.name,
+            "genre_name": self.genre_name,
             "genre_id": self.genre_id
         }
 
 class TagLike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    name = db.Column(db.String(50), unique=False, nullable=True)
+    tag_name = db.Column(db.String(50), unique=False, nullable=True)
     tag_id = db.Column(db.String(50), unique=False, nullable=True)
 
     def __repr__(self):
@@ -115,14 +115,14 @@ class TagLike(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "name": self.name,
+            "tag_name": self.tag_name,
             "tag_id": self.tag_id
         }
 
 class TagDislike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    name = db.Column(db.String(50), unique=False, nullable=True)
+    tag_name = db.Column(db.String(50), unique=False, nullable=True)
     tag_id = db.Column(db.String(50), unique=False, nullable=True)
 
     def __repr__(self):
@@ -132,6 +132,6 @@ class TagDislike(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "name": self.name,
+            "tag_name": self.tag_name,
             "tag_id": self.tag_id       
         }

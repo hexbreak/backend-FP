@@ -221,8 +221,6 @@ def addget_platform(user_id):
 @app.route('/user/<int:user_id>/platforms/<int:id>', methods=['DELETE'])
 def remove_platform(user_id, id):
 
-    body = request.get_json()
-
     removeplatform = Platform.query.get(id)
     if removeplatform is None:
         raise APIException('ID not found', status_code=404)
@@ -238,7 +236,7 @@ def addget_genrelikes(user_id):
     body = request.get_json()
 
     if request.method == 'POST':
-        addlike = GenreLike(user_id=user_id, name=body['name'], genre_id=body['genre_id'])
+        addlike = GenreLike(user_id=user_id, genre_name=body['genre_name'], genre_id=body['genre_id'])
         db.session.add(addlike)
         db.session.commit()
         response_body = addlike.serialize()
@@ -257,8 +255,6 @@ def addget_genrelikes(user_id):
 @app.route('/user/<int:user_id>/degl/<int:id>', methods=['DELETE'])
 def remove_genrelikes(user_id, id):
 
-    body = request.get_json()
-
     removelike = GenreLike.query.get(id)
     if removelike is None:
         raise APIException('ID not found', status_code=404)
@@ -274,7 +270,7 @@ def addget_genredislikes(user_id):
     body = request.get_json()
 
     if request.method == 'POST':
-        addislike = GenreDislike(user_id=user_id, name=body['name'], genre_id=body['genre_id'])
+        addislike = GenreDislike(user_id=user_id, genre_name=body['genre_name'], genre_id=body['genre_id'])
         db.session.add(addislike)
         db.session.commit()
         response_body = addislike.serialize()
@@ -293,8 +289,6 @@ def addget_genredislikes(user_id):
 @app.route('/user/<int:user_id>/degd/<int:id>', methods=['DELETE'])
 def remove_genredislikes(user_id, id):
 
-    body = request.get_json()
-
     removedislike = GenreDislike.query.get(id)
     if removedislike is None:
         raise APIException('ID not found', status_code=404)
@@ -310,7 +304,7 @@ def postget_taglike(user_id):
     body = request.get_json()
 
     if request.method == 'POST':
-        addlike = TagLike(user_id=user_id, name=body['name'], tag_id=body['tag_id'])
+        addlike = TagLike(user_id=user_id, tag_name=body['tag_name'], tag_id=body['tag_id'])
         db.session.add(addlike)
         db.session.commit()
         response_body = addlike.serialize()
@@ -329,8 +323,6 @@ def postget_taglike(user_id):
 @app.route('/user/<int:user_id>/detl/<int:id>', methods=['DELETE'])
 def remove_taglikes(user_id, id):
 
-    body = request.get_json()
-
     removetag = TagLike.query.get(id)
     if removetag is None:
         raise APIException('ID not found', status_code=404)
@@ -346,7 +338,7 @@ def postget_tagdislikes(user_id):
     body = request.get_json()
 
     if request.method == 'POST':
-        addislike = TagDislike(user_id=user_id, name=body['name'], tag_id=body['tag_id'])
+        addislike = TagDislike(user_id=user_id, tag_name=body['tag_name'], tag_id=body['tag_id'])
         db.session.add(addislike)
         db.session.commit()
         response_body = addislike.serialize()
