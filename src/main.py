@@ -356,9 +356,6 @@ def postget_tagdislikes(user_id):
 # TagDislike DELETE (Remove)
 @app.route('/user/<int:user_id>/detd/<int:id>', methods=['DELETE'])
 def remove_tagdislikes(user_id, id):
-
-    body = request.get_json()
-
     removetag = TagDislike.query.get(id)
     if removetag is None:
         raise APIException('ID not found', status_code=404)
